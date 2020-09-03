@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from mpmanager import MPManager
+from Linea2D import Linea2D
 
 
 #Librerias Graficadoras
@@ -17,12 +18,16 @@ class Graficador:
     Clase que tiene el objetivo de funcionar como API para realizar graficos de to.do tipo, haciendo uso de librerias
     graficadores entre las que se encuentre matplotlib y seaborn.
     """
-    def __init__(self,filas=1,col=1):
+    def __init__(self,filas=1,col=1,estilo=["default"]):
         """
         Metodo incializador de la figura que contendra los graficos, como a su vez de un mp_manager en caso de requerir subplots
         :param filas: Cantidad de filas de graficos que contendra nuestra figura
         :param col: Cantidad de columnas de graficos que contendra nuestra figura
+        :param estilo: Una lista con los estilos que tendra el grafico.
+        
+        Para mas informacion sobre estilos: https://tonysyu.github.io/raw_content/matplotlib-style-gallery/gallery.html
         """
+        ppl.style.use(estilo)
         self.figura, self.axes = ppl.subplots(filas, col, figsize=(8.6, 6))
         self.mp_manager = self.__instanciar_manager__(filas,col)
 
@@ -52,26 +57,41 @@ class Graficador:
         else:
             return self.mp_manager.get_ax_agraficar(self.axes)
 
-    def g2d_graficar(self,x,y,color='black',estiloPuntos=".",estiloLinea="solid",label=None):
+    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",title=None):
         """
         Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
 
         :param x: Vector que representa los puntos en el eje horizontal
         :param y: Vector que representa los puntos en el eje vertical
-        :param color: Color de la linea
-        :param estiloPuntos: ., o, |,  _, More info: https://matplotlib.org/3.3.1/api/markers_api.html#module-matplotlib.markers
-        :param estiloLinea: solid, dashed, dashdot, dotted
-        :return:
+        :param linea: Una instancia de la clase Linea2D
+        :param label: Un string que represente el label del grafico
+        :param posLegend: upper/lower/center + left/right todas las combinaciones
         """
         ax = self.obt_ax()
-        ax.plot(x,y,color=color,marker=estiloPuntos, linestyle=estiloLinea,label=label)
-
+        ax.set_title(title)
+        ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,
+                mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label)
+        if label:
+            ax.legend(loc=posLegend)
+        
     def display_graficos(self):
+        """
+           Hace un display de los graficos
+        """
         ppl.show()
 
 
-graficador = Graficador(1,3)
-graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],color="red",estiloLinea="dashed")
+#Defino La linea
+linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
+linea.set_color_punto("#f45ddc")
+linea.set_tamanio_punto(20)
+linea.set_color_contorno_punto("#ffffff")
+
+#Realizo grafico
+graficador = Graficador(1,3,estilo=["seaborn"])
+graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left","Grafico de prueba")
+
+#Hago un display de los graficos
 graficador.display_graficos()
 
 

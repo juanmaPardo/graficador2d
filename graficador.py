@@ -13,9 +13,13 @@ import seaborn as sb
 
 
 class Graficador:
+    """
+    Clase que tiene el objetivo de funcionar como API para realizar graficos de to.do tipo, haciendo uso de librerias
+    graficadores entre las que se encuentre matplotlib y seaborn.
+    """
     def __init__(self,filas=1,col=1):
         """
-        Clase inicializadora de la figura que contendra los graficos, como a su vez de un mp_manager en caso de requerir subplots
+        Metodo incializador de la figura que contendra los graficos, como a su vez de un mp_manager en caso de requerir subplots
         :param filas: Cantidad de filas de graficos que contendra nuestra figura
         :param col: Cantidad de columnas de graficos que contendra nuestra figura
         """
@@ -38,7 +42,7 @@ class Graficador:
         else:
             return MPManager(filas,col)
 
-    def obt_axes(self):
+    def obt_ax(self):
         """
 
         :return: Devuelve el subplot sobre el cual se debe realizar el siguiente grafico
@@ -48,11 +52,28 @@ class Graficador:
         else:
             return self.mp_manager.get_ax_agraficar(self.axes)
 
-    #def g2d_coneccion_lineal(self,x,y):
-    #    return False
+    def g2d_graficar(self,x,y,color='black',estiloPuntos=".",estiloLinea="solid",label=None):
+        """
+        Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
+
+        :param x: Vector que representa los puntos en el eje horizontal
+        :param y: Vector que representa los puntos en el eje vertical
+        :param color: Color de la linea
+        :param estiloPuntos: ., o, |,  _, More info: https://matplotlib.org/3.3.1/api/markers_api.html#module-matplotlib.markers
+        :param estiloLinea: solid, dashed, dashdot, dotted
+        :return:
+        """
+        ax = self.obt_ax()
+        ax.plot(x,y,color=color,marker=estiloPuntos, linestyle=estiloLinea,label=label)
+
+    def display_graficos(self):
+        ppl.show()
 
 
-Graficador(1,3)
+graficador = Graficador(1,3)
+graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],color="red",estiloLinea="dashed")
+graficador.display_graficos()
+
 
     
 

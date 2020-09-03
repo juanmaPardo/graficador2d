@@ -57,7 +57,7 @@ class Graficador:
         else:
             return self.mp_manager.get_ax_agraficar(self.axes)
 
-    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",title=None):
+    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",titulo=None):
         """
         Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
 
@@ -66,14 +66,28 @@ class Graficador:
         :param linea: Una instancia de la clase Linea2D
         :param label: Un string que represente el label del grafico
         :param posLegend: upper/lower/center + left/right todas las combinaciones
+        :param title: Titulo del grafico
         """
         ax = self.obt_ax()
-        ax.set_title(title)
+        ax.set_title(titulo)
         ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,
                 mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label)
         if label:
             ax.legend(loc=posLegend)
-        
+
+
+    def histograma(self,x,bins=None,tam_barra=None,color_barra="#5d82c9",color_borde="black",
+                   orientacion="vertical",label=None,posLegend="upper right",titulo=None,
+                   display_bins_ranges=False):
+        ax = self.obt_ax()
+        ax.set_title(titulo)
+        (_,bins,_) = ax.hist(x,bins=bins,rwidth=tam_barra,orientation=orientacion,fc=color_barra,ec=color_borde)
+        indices = bins[[i%2 == 0 for i in range(len(bins))]] if not display_bins_ranges else bins
+        ppl.sca(ax)
+        ppl.xticks(indices) if orientacion=="vertical" else ppl.yticks(indices)
+        if label:
+            ax.legend(loc=posLegend)
+
     def display_graficos(self):
         """
            Hace un display de los graficos
@@ -87,9 +101,14 @@ linea.set_color_punto("#f45ddc")
 linea.set_tamanio_punto(20)
 linea.set_color_contorno_punto("#ffffff")
 
-#Realizo grafico
+#Instancio clase
 graficador = Graficador(1,3,estilo=["seaborn"])
+
+#Realizo Grafico Uno
 graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left","Grafico de prueba")
+
+#Realizo Grafico Dos
+graficador.histograma([1,1,2,3,2,5,6,2,1.5,6,4],titulo="Prueba histograma")
 
 #Hago un display de los graficos
 graficador.display_graficos()

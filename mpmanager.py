@@ -34,7 +34,7 @@ class MPManager:
         """
         vIndices = []
         if(self.mono_fila_o_col):
-           return range(filas) if (filas == 1) else range(col)
+           return range(col) if (filas == 1) else range(filas)
         else:
             for i in range(filas):
                 for j in range(col):

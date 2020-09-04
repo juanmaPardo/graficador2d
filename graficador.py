@@ -73,8 +73,9 @@ class Graficador:
         """
         ax = self.obt_ax(saag)
         ax.set_title(titulo)
-        ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,
-                mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label)
+        ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,alpha=linea.opaquedad,
+                mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label,
+                lw=linea.anchoLinea)
         if label:
             ax.legend(loc=posLegend)
 
@@ -133,8 +134,28 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
-    def g2d_dispersion(self,saag=True):
-        return false
+    def g2d_dispersion(self,x,y,c="#552df4f7",s=None,marker="o",ec="face",label=None,posLegend="upper right",
+                       titulo=None,saag=True,opaquedad=1):
+        """
+        Grafica un grafico de dispersion
+        :param x: Coordenadas X
+        :param y: Coordenadas Y
+        :param c: color de los puntos
+        :param s: tamaño de los puntos
+        :param marker: Tipo de punto
+        :param ec: color del contorno de los puntos
+        :param label: label del grafico
+        :param posLegend: Posicion donde se encontrara la legenda
+        :param titulo: titulo del grafico
+        :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
+            otro grafico sobre el mismo subplot.
+        """
+        ax = self.obt_ax(saag)
+        ax.set_title(titulo)
+        ax.scatter(x,y,c=c,s=s,marker=marker,edgecolor=ec,alpha=opaquedad,label=label)
+        if label:
+            ax.legend(loc=posLegend)
+
     def display_graficos(self):
         """
            Hace un display de los graficos
@@ -171,6 +192,14 @@ graficador.histograma_conjunto([1,1,2,3,2,5,6,2,1.5,6,6],[1,3,3,2,1,3,6,8,4,5,6,
 graficador.display_graficos()
 
 # Set de graficos Numero dos #
+
 # #Instancio clase
 graficador = Graficador(2,2,estilo=["seaborn"])
 
+#Realizo grafico numero uno
+linea.set_opaquedad(0.7)
+graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Aproximation","upper left","Simulacion",saag=False)
+graficador.g2d_dispersion([1,2,3,4,5,6],[1.2,2.2,2.8,3.7,5.1,6],s=45,opaquedad=0.8,posLegend="upper left",label="Real",saag=True)
+
+#Hago un display de los graficos
+graficador.display_graficos()

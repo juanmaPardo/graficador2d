@@ -134,6 +134,59 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
+    def grafico_tarta(self,data,labels,colores=None,s_destacar=None,sombra=False,d_valores=False,
+                      angulo_inicio=0,anchoLinea=1,opaquedad=1,titulo=None,posLegend="upper right"):
+        """
+        Realiza un grafico de tarta
+        :param data: Valores por categoria
+        :param colores: Categoria respectiva a los valores
+        :param s_destacar: Variable que se utiliza para destacar uno de los slices de la torta.
+        Las opciones disponibles son {'max','min','#insertLabelName',None}
+        :param sombra: True si queres que la tarta tenga sombreado
+        :param d_valores: True si queres que se haga un display de los valores al lado de su porcentaje
+        :param angulo_inicio: Angulo en el cual queres que empieze la tarta
+        :param anchoLinea: Ancho de la linea que separa los slices
+        :param c_linea: Color de la linea que separa los slices
+        :param opaquedad: Opaquedad de la linea que separa los slices
+        :param titulo: Titulo del grafico
+        :param posLegend: Posicion donde se encontrara la leyenda
+        """
+        def make_autopct(values):
+            """
+                Define el display que se realiza en cada slice
+            """
+            def my_autopct(pct):
+                total = sum(values)
+                val = int(round(pct * total / 100.0))
+                return '{p:.2f}%  ({v:d})'.format(p=pct, v=val)
+            return my_autopct
+        def get_explode_list(data,labels,s_destacar):
+            """
+            Devuelve una lista que representa el factor por el cual hay que levantar a cada
+            slice
+            """
+            estandar = np.arange(len(labels),dtype=np.float64)
+            estandar.fill(0.0)
+            if(s_destacar == "max"):
+                i_max = np.argmax(np.array(data))
+                estandar[i_max] = 0.1
+            elif(s_destacar == "min"):
+                i_min = np.argmin(np.array(data))
+                estandar[i_min] = 0.1
+            else:
+                pos_label = np.where(np.array(labels) == s_destacar)
+                if(pos_label[0]):#Si devolvio una lista que no esta vacia
+                    estandar[pos_label[0][0]] = 0.1
+            return estandar
+
+        ax = self.obt_ax(True)
+        ax.set_title(titulo)
+        explode_list = get_explode_list(data,labels,s_destacar) if s_destacar else None
+        auto_pct = make_autopct(data) if d_valores else "%1.1f%%"
+        ax.pie(data,labels=labels,explode=explode_list,autopct=auto_pct,colors=colores, startangle=angulo_inicio,
+               shadow=sombra,wedgeprops={'alpha':opaquedad,'lw':anchoLinea})
+        ax.legend(loc=posLegend)
+
     def g2d_dispersion(self,x,y,c="#552df4f7",s=None,marker="o",ec="face",label=None,posLegend="upper right",
                        titulo=None,saag=True,opaquedad=1):
         """
@@ -200,6 +253,11 @@ graficador = Graficador(2,2,estilo=["seaborn"])
 linea.set_opaquedad(0.7)
 graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Aproximation","upper left","Simulacion",saag=False)
 graficador.g2d_dispersion([1,2,3,4,5,6],[1.2,2.2,2.8,3.7,5.1,6],s=45,opaquedad=0.8,posLegend="upper left",label="Real",saag=True)
+
+#Realizo grafico numero dos
+graficador.grafico_tarta([21321,15689,26500],labels=["Perros","Loros","Tortugas"],anchoLinea=3,
+                         colores=["#624848","#394f35","#f45ddc"],sombra=True,d_valores=True,
+                         s_destacar="max",titulo="Grafico tarta",angulo_inicio=90)
 
 #Hago un display de los graficos
 graficador.display_graficos()

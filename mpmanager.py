@@ -41,10 +41,13 @@ class MPManager:
                     vIndices.append((i,j))
             return vIndices
 
-    def get_ax_agraficar(self,axes):
+    def get_ax_agraficar(self,axes,saag):
         """
         :param axes: variable pertenenciente a la clase Axis que contiene tantas filas y columnas como se indico en la
         inicializacion
+        :param saag: Valor booleano que define si el proximo grafico desea ser realizado
+        sobre la misma axis o no. En caso de ser True se sumara 1 al valor actual del index, en caso
+        de ser Falso no.
         :return: Devuelve el subplot sobre el cual se debe realizar el siguiente grafico, en caso que se desee realizar
         mas graficos de los que son posibles para los valores indicados se lanza una excepcion.
         """
@@ -56,7 +59,7 @@ class MPManager:
             ax = axes[self.vIndices[self.index_actual]]
         else:
             ax = axes[self.vIndices[self.index_actual][0], self.vIndices[self.index_actual][1]]
-        self.index_actual += 1
+        self.index_actual += 1 if saag else 0
         return ax
 
 

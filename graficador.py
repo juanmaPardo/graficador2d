@@ -47,17 +47,18 @@ class Graficador:
         else:
             return MPManager(filas,col)
 
-    def obt_ax(self):
+    def obt_ax(self,saag):
         """
-
+        :param saag: Valor booleano que define si el proximo grafico desea ser realizado
+        sobre la misma axis o no.
         :return: Devuelve el subplot sobre el cual se debe realizar el siguiente grafico
         """
         if(self.mp_manager == None):
             return self.axes
         else:
-            return self.mp_manager.get_ax_agraficar(self.axes)
+            return self.mp_manager.get_ax_agraficar(self.axes,saag)
 
-    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",titulo=None):
+    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",titulo=None,saag=True):
         """
         Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
 
@@ -67,14 +68,15 @@ class Graficador:
         :param label: Un string que represente el label del grafico
         :param posLegend: upper/lower/center + left/right todas las combinaciones
         :param title: Titulo del grafico
+        :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
+                    otro grafico sobre el mismo subplot.
         """
-        ax = self.obt_ax()
+        ax = self.obt_ax(saag)
         ax.set_title(titulo)
         ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,
                 mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label)
         if label:
             ax.legend(loc=posLegend)
-
 
     def histograma(self,x,bins=None,tam_barra=None,color_barra="#5d82c9",color_borde="black",
                    orientacion="vertical",label=None,posLegend="upper right",titulo=None,
@@ -95,7 +97,7 @@ class Graficador:
         :param display_bins_ranges: True si queres que se muestren todos los rangos que determinan cada bien
                                     ya sea en el eje X o en el eje Y
         """
-        ax = self.obt_ax()
+        ax = self.obt_ax(True)
         ax.set_title(titulo)
         (_,bins,_) = ax.hist(x,bins=bins,rwidth=tam_barra,orientation=orientacion,fc=color_barra,ec=color_borde)
         indices = bins[[i%2 == 0 for i in range(len(bins))]] if not display_bins_ranges else bins
@@ -120,7 +122,7 @@ class Graficador:
         :param posLegend: Posicion en donde queres que se encuentre la leyenda
         :param titulo: Titulo del grafico
         """
-        ax = self.obt_ax()
+        ax = self.obt_ax(True)
         ax.set_title(titulo)
         (_,bins1,_) = ax.hist(x1,bins=bins1,alpha=0.8,rwidth=0.97,orientation=orientacion,fc=cbarrras[0],ec=cbordes[0],label=label[0])
         (_,bins2,_) = ax.hist(x2,bins=bins2,alpha=0.5,orientation=orientacion,fc=cbarrras[1],ec=cbordes[1],label=label[1])
@@ -131,6 +133,8 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
+    def g2d_dispersion(self,saag=True):
+        return false
     def display_graficos(self):
         """
            Hace un display de los graficos
@@ -144,12 +148,18 @@ linea.set_color_punto("#f45ddc")
 linea.set_tamanio_punto(20)
 linea.set_color_contorno_punto("#ffffff")
 
+linea2 = Linea2D(color="#5d1313",estiloLinea="solid",estiloPunto="o")
+linea2.set_color_punto("#d9bf36")
+linea2.set_tamanio_punto(10)
+linea2.set_color_contorno_punto("#ffffff")
+
 # Set de graficos Numero uno #
 #Instancio clase
 graficador = Graficador(1,3,estilo=["seaborn"])
 
 #Realizo Grafico Uno
-graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left","Grafico de prueba")
+graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left","Grafico de prueba",saag=False)
+graficador.g2d_graficar([1,2,3,4,5,6],[6,5,4,3,2,1],linea2,"Solid line","upper center","Grafico de prueba",saag=True)
 
 #Realizo Grafico Dos
 graficador.histograma([1,1,2,3,2,5,6,2,1.5,6,4],titulo="Prueba histograma")
@@ -161,5 +171,6 @@ graficador.histograma_conjunto([1,1,2,3,2,5,6,2,1.5,6,6],[1,3,3,2,1,3,6,8,4,5,6,
 graficador.display_graficos()
 
 # Set de graficos Numero dos #
-    
+# #Instancio clase
+graficador = Graficador(2,2,estilo=["seaborn"])
 

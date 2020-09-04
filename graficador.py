@@ -40,6 +40,12 @@ class Graficador:
         self.cur_index = 0
 
     def __instanciar_axes__(self,proporciones):
+        """
+        Agrega todas las axis que se indico que se iba a utilizar. Dicha cantidad de axis esta representada
+        por la longitud del vector contenido en la variable proporciones
+
+        :param proporciones: Lista de string que representa la proporcion que va a ocupar cada subplot
+        """
         def definir_gridspec(proporcion):
             """
             Traduce el significado de la proporcion a una de las siguientes keywords
@@ -125,7 +131,7 @@ class Graficador:
         self.cur_index += 1 if saag else 0
         return cur_ax
 
-    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",titulo=None,saag=True):
+    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",saag=True):
         """
         Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
 
@@ -139,7 +145,6 @@ class Graficador:
                     otro grafico sobre el mismo subplot.
         """
         ax = self.get_axis_actual(saag)
-        ax.set_title(titulo)
         ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,alpha=linea.opaquedad,
                 mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label,
                 lw=linea.anchoLinea)
@@ -147,8 +152,7 @@ class Graficador:
             ax.legend(loc=posLegend)
 
     def histograma(self,x,bins=None,tam_barra=None,color_barra="#5d82c9",color_borde="black",
-                   orientacion="vertical",label=None,posLegend="upper right",titulo=None,
-                   display_bins_ranges=False):
+                   orientacion="vertical",label=None,posLegend="upper right", display_bins_ranges=False):
         """
         Realiza el grafico de un histograma en la axis correspondiente con la informacion que se
         le otorgo por parametro.
@@ -166,7 +170,6 @@ class Graficador:
                                     ya sea en el eje X o en el eje Y
         """
         ax = self.get_axis_actual(True)
-        ax.set_title(titulo)
         (_,bins,_) = ax.hist(x,bins=bins,rwidth=tam_barra,orientation=orientacion,fc=color_barra,ec=color_borde)
         indices = bins[[i%2 == 0 for i in range(len(bins))]] if not display_bins_ranges else bins
         ppl.sca(ax)
@@ -175,7 +178,7 @@ class Graficador:
             ax.legend(loc=posLegend)
 
     def histograma_conjunto(self,x1,x2,bins1=None,bins2=None,cbarrras=["#fcb27c","#5d82c9"],cbordes=["black","black"],display_bins_ranges=False,
-                  orientacion="vertical",label=[None,None],posLegend="upper right",titulo=None):
+                  orientacion="vertical",label=[None,None],posLegend="upper right"):
         """
         Grafica dos histogramas uno arriba del otro con objetivos de comparar resultados
         :param x1: Set de datos 1
@@ -191,7 +194,6 @@ class Graficador:
         :param titulo: Titulo del grafico
         """
         ax = self.get_axis_actual(True)
-        ax.set_title(titulo)
         (_,bins1,_) = ax.hist(x1,bins=bins1,alpha=0.8,rwidth=0.97,orientation=orientacion,fc=cbarrras[0],ec=cbordes[0],label=label[0])
         (_,bins2,_) = ax.hist(x2,bins=bins2,alpha=0.5,orientation=orientacion,fc=cbarrras[1],ec=cbordes[1],label=label[1])
         conc_bins = np.sort(np.concatenate((bins1,bins2),axis=None))
@@ -202,7 +204,7 @@ class Graficador:
             ax.legend(loc=posLegend)
 
     def grafico_tarta(self,data,labels,colores=None,s_destacar=None,sombra=False,d_valores=False,
-                      angulo_inicio=0,anchoLinea=1,opaquedad=1,titulo=None,posLegend="upper right"):
+                      angulo_inicio=0,anchoLinea=1,opaquedad=1,posLegend="upper right"):
         """
         Realiza un grafico de tarta
         :param data: Valores por categoria
@@ -247,7 +249,6 @@ class Graficador:
             return estandar
 
         ax = self.get_axis_actual(True)
-        ax.set_title(titulo)
         explode_list = get_explode_list(data,labels,s_destacar) if s_destacar else None
         auto_pct = make_autopct(data) if d_valores else "%1.1f%%"
         ax.pie(data,labels=labels,explode=explode_list,autopct=auto_pct,colors=colores, startangle=angulo_inicio,
@@ -255,7 +256,7 @@ class Graficador:
         ax.legend(loc=posLegend)
 
     def g2d_dispersion(self,x,y,c="#552df4f7",s=None,marker="o",ec="face",label=None,posLegend="upper right",
-                       titulo=None,saag=True,opaquedad=1):
+                       saag=True,opaquedad=1):
         """
         Grafica un grafico de dispersion
         :param x: Coordenadas X
@@ -271,10 +272,23 @@ class Graficador:
             otro grafico sobre el mismo subplot.
         """
         ax = self.get_axis_actual(saag)
-        ax.set_title(titulo)
         ax.scatter(x,y,c=c,s=s,marker=marker,edgecolor=ec,alpha=opaquedad,label=label)
         if label:
             ax.legend(loc=posLegend)
+
+    def set_ax_metadata__(self,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
+        """
+        Define la metadata de la axis sobre la cual se esta trabajando
+        :param titulo: Titulo del grafico
+        :param x_label: label para el eje x
+        :param y_label: label para el eje y
+        :param x_font: Tamaño de la fuente del label para el eje x
+        :param y_font: Tamaño de la fuente del label para el eje y
+        """
+        ax = self.get_axis_actual(False)
+        ax.set_title(titulo)
+        ax.set_xlabel(x_label,fontsize=x_font)
+        ax.set_ylabel(y_label,fontsize=y_font)
 
     def display_graficos(self):
         """
@@ -299,32 +313,43 @@ linea2.set_color_contorno_punto("#ffffff")
 graficador = Graficador(['0,0','0,1','0,2'],1,3,estilo=["seaborn"])
 
 #Realizo Grafico Uno
-graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left","Grafico de prueba",saag=False)
-graficador.g2d_graficar([1,2,3,4,5,6],[6,5,4,3,2,1],linea2,"Solid line","upper center","Grafico de prueba",saag=True)
+graficador.set_ax_metadata__(titulo="Combinacion graficos",x_label="Eje x",y_label="Eje y")
+graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left",saag=False)
+graficador.g2d_graficar([1,2,3,4,5,6],[6,5,4,3,2,1],linea2,"Solid line","upper center",saag=True)
 
 #Realizo Grafico Dos
-graficador.histograma([1,1,2,3,2,5,6,2,1.5,6,4],titulo="Prueba histograma")
+graficador.set_ax_metadata__(titulo="Histograma")
+graficador.histograma([1,1,2,3,2,5,6,2,1.5,6,4])
 
 #Realizo Grafico Tres
-graficador.histograma_conjunto([1,1,2,3,2,5,6,2,1.5,6,6],[1,3,3,2,1,3,6,8,4,5,6,4,1,2],label=["H1","H2"],titulo="Histogramas conjuntos")
+graficador.set_ax_metadata__(titulo="Histograma conjunto",x_label="Eje x",y_label="Eje y",x_font=24,y_font=24)
+graficador.histograma_conjunto([1,1,2,3,2,5,6,2,1.5,6,6],[1,3,3,2,1,3,6,8,4,5,6,4,1,2],label=["H1","H2"])
 
 #Hago un display de los graficos
 graficador.display_graficos()
 
-# Set de graficos Numero dos #
 
+# Set de graficos Numero Dos #
+graficador = Graficador(['0,0'],1,1,estilo=["seaborn"])
+graficador.set_ax_metadata__(titulo="Prueba solo un grafico",x_label="Eje x",y_label="Eje y")
+graficador.g2d_dispersion([1,2,3,4],[1,2,3,4])
+graficador.display_graficos()
+
+# Set de graficos Numero tres #
 # #Instancio clase
 graficador = Graficador(['0,0','0,1:','1,0','1,1:'],2,3,estilo=["seaborn"])
 
 #Realizo grafico numero uno
 linea.set_opaquedad(0.7)
-graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Aproximation","upper left","Simulacion",saag=False)
+graficador.set_ax_metadata__(titulo="Prueba Opaquidad")
+graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Aproximation","upper left",saag=False)
 graficador.g2d_dispersion([1,2,3,4,5,6],[1.2,2.2,2.8,3.7,5.1,6],s=45,opaquedad=0.8,posLegend="upper left",label="Real",saag=True)
 
 #Realizo grafico numero dos
+graficador.set_ax_metadata__(titulo="Grafico tarta")
 graficador.grafico_tarta([21321,15689,26500],labels=["Perros","Loros","Tortugas"],anchoLinea=3,
                          colores=["#624848","#394f35","#f45ddc"],sombra=True,d_valores=True,
-                         s_destacar="max",titulo="Grafico tarta",angulo_inicio=90)
+                         s_destacar="max",angulo_inicio=90)
 
 #Hago un display de los graficos
 graficador.display_graficos()

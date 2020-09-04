@@ -4,7 +4,6 @@ import numpy as np
 #Clases necesarias
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from mpmanager import MPManager
 from Linea2D import Linea2D
 
 
@@ -18,45 +17,113 @@ class Graficador:
     Clase que tiene el objetivo de funcionar como API para realizar graficos de to.do tipo, haciendo uso de librerias
     graficadores entre las que se encuentre matplotlib y seaborn.
     """
-    def __init__(self,filas=1,col=1,estilo=["default"]):
+    def __init__(self,proporciones,filas=1,col=1,estilo=["default"]):
         """
         Metodo incializador de la figura que contendra los graficos, como a su vez de un mp_manager en caso de requerir subplots
         :param filas: Cantidad de filas de graficos que contendra nuestra figura
         :param col: Cantidad de columnas de graficos que contendra nuestra figura
         :param estilo: Una lista con los estilos que tendra el grafico.
-        
+        :param proporciones: Define el lugar y el espacio que va a ocupar cada subplot.Se espera
+                             recibir una lista de strings.
+        Ejemplo: 3 graficos, 2 filas  y 2 columnas.
+        Queremos 1 grafico chico arriba en [0,0], otro chico abajo en [1,0] y el otro largo
+        que ocupe [0,1] y [1,1], entonces mandarias por parametro. ['0,0',':,1','1,0']
+
+        Para mas informacion sobre grids = https://matplotlib.org/tutorials/intermediate/gridspec.html#sphx-glr-tutorials-intermediate-gridspec-py
         Para mas informacion sobre estilos: https://tonysyu.github.io/raw_content/matplotlib-style-gallery/gallery.html
         """
+
         ppl.style.use(estilo)
-        self.figura, self.axes = ppl.subplots(filas, col, figsize=(8.6, 6))
-        self.mp_manager = self.__instanciar_manager__(filas,col)
+        self.figura = ppl.figure(constrained_layout=True)
+        self.grid_spec = self.figura.add_gridspec(filas,col)
+        self.axes = self.__instanciar_axes__(proporciones)
+        self.cur_index = 0
 
-    def __instanciar_manager__(self,filas,col):
-        """
-        En caso que solo se requiera de graficar en una sola figura mas de un grafico se inicializa
-        un MPManager que se encargara de otorgarnos cuando se lo pidamos el subplot sobre el cual
-        debemos trabajar
+    def __instanciar_axes__(self,proporciones):
+        def definir_gridspec(proporcion):
+            """
+            Traduce el significado de la proporcion a una de las siguientes keywords
 
-        :param filas: Cantidad de filas de graficos que contendra nuestra figura
-        :param col: Cantidad de columnas de graficos que contendra nuestra figura
-        :return: Una instancia de la clase MPManager que se encarga de otorgarnos el siguiente subplot sobre el cual
-        debemos realizar un grafico
-        """
-        if(filas == 1 and col == 1):
-            return None
-        else:
-            return MPManager(filas,col)
+            num_: = En caso de que haya un numero seguido de el caracter :
+            :_num = En caso de que este el caracter : seguido de un numero
 
-    def obt_ax(self,saag):
+            num_num = En caso que tengamos dos numeros
+
+            num1:_num2 = Todas las filas desde el num1 para abajo en la columna num2
+            num1_num2: = Todas las columnas desde el num2 para la derecha en la fila num1
+
+            :num1_num2 = Todas las filas hasta el num1 para abajo en la columna num2
+            num1_:num2: = Todas las columnas hasta el num2 en la fila num1
+
+            num1:_:num2 = Todas las filas desde el num1 para abajo hasta la columna num2
+            :num1_:num2 = Todas las filas hasta el num1, desde la columna 0 a la num2
+
+            num1:_num2: = Desde la fila num1 en adelante desde la columna dos en adelante
+            :num1_num2: = Todas las filas hasta la num1, desde la columna num2 en adelante
+
+            :param proporcion: String que representa una proporcion a cubrir del grafico
+            :return: El rango de grid que se va a utilizar en dicho subplot
+            """
+            prop = proporcion.strip()
+            if(len(prop) == 3 and prop[0].isdigit() and prop[2].isdigit()):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                return self.grid_spec[n1,n2]
+            if(len(prop) == 3 and prop[0].isdigit()):
+                n1 = int(prop[0])
+                return self.grid_spec[n1, :]
+            if(len(prop) == 3 and prop[2].isdigit()):
+                n2 = int(prop[2])
+                return self.grid_spec[:, n2]
+
+            if(len(prop) == 4 and prop[0] == ":"):
+                n1 = int(prop[1])
+                n2 = int(prop[3])
+                return self.grid_spec[:n1, n2]
+            if(len(prop) == 4 and prop[1] == ":"):
+                n1 = int(prop[0])
+                n2 = int(prop[3])
+                return self.grid_spec[n1:, n2]
+            if(len(prop) == 4 and prop[2] == ":"):
+                n1 = int(prop[0])
+                n2 = int(prop[3])
+                return self.grid_spec[n1, :n2]
+            if (len(prop) == 4 and prop[3] == ":"):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                return self.grid_spec[n1, n2:]
+
+            if(len(prop) == 5 and prop[0] == ":" and prop[3]== ":"):
+                n1 = int(prop[1])
+                n2 = int(prop[4])
+                return self.grid_spec[:n1, :n2]
+            if(len(prop) == 5 and prop[1] == ":" and prop[4]== ":"):
+                n1 = int(prop[0])
+                n2 = int(prop[3])
+                return self.grid_spec[n1:, n2:]
+            if(len(prop) == 5 and prop[1] == ":" and prop[3] == ":"):
+                n1 = int(prop[0])
+                n2 = int(prop[4])
+                return self.grid_spec[n1:, :n2]
+            if (len(prop) == 5 and prop[0] == ":" and prop[4] == ":"):
+                n1 = int(prop[1])
+                n2 = int(prop[3])
+                return self.grid_spec[:n1, n2:]
+
+        axes = []
+        for i in range(len(proporciones)):
+            axes.append(self.figura.add_subplot(definir_gridspec(proporciones[i])))
+        return axes
+
+    def get_axis_actual(self,saag):
         """
         :param saag: Valor booleano que define si el proximo grafico desea ser realizado
         sobre la misma axis o no.
         :return: Devuelve el subplot sobre el cual se debe realizar el siguiente grafico
         """
-        if(self.mp_manager == None):
-            return self.axes
-        else:
-            return self.mp_manager.get_ax_agraficar(self.axes,saag)
+        cur_ax = self.axes[self.cur_index]
+        self.cur_index += 1 if saag else 0
+        return cur_ax
 
     def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",titulo=None,saag=True):
         """
@@ -71,7 +138,7 @@ class Graficador:
         :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
                     otro grafico sobre el mismo subplot.
         """
-        ax = self.obt_ax(saag)
+        ax = self.get_axis_actual(saag)
         ax.set_title(titulo)
         ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,alpha=linea.opaquedad,
                 mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label,
@@ -98,7 +165,7 @@ class Graficador:
         :param display_bins_ranges: True si queres que se muestren todos los rangos que determinan cada bien
                                     ya sea en el eje X o en el eje Y
         """
-        ax = self.obt_ax(True)
+        ax = self.get_axis_actual(True)
         ax.set_title(titulo)
         (_,bins,_) = ax.hist(x,bins=bins,rwidth=tam_barra,orientation=orientacion,fc=color_barra,ec=color_borde)
         indices = bins[[i%2 == 0 for i in range(len(bins))]] if not display_bins_ranges else bins
@@ -123,7 +190,7 @@ class Graficador:
         :param posLegend: Posicion en donde queres que se encuentre la leyenda
         :param titulo: Titulo del grafico
         """
-        ax = self.obt_ax(True)
+        ax = self.get_axis_actual(True)
         ax.set_title(titulo)
         (_,bins1,_) = ax.hist(x1,bins=bins1,alpha=0.8,rwidth=0.97,orientation=orientacion,fc=cbarrras[0],ec=cbordes[0],label=label[0])
         (_,bins2,_) = ax.hist(x2,bins=bins2,alpha=0.5,orientation=orientacion,fc=cbarrras[1],ec=cbordes[1],label=label[1])
@@ -179,7 +246,7 @@ class Graficador:
                     estandar[pos_label[0][0]] = 0.1
             return estandar
 
-        ax = self.obt_ax(True)
+        ax = self.get_axis_actual(True)
         ax.set_title(titulo)
         explode_list = get_explode_list(data,labels,s_destacar) if s_destacar else None
         auto_pct = make_autopct(data) if d_valores else "%1.1f%%"
@@ -203,7 +270,7 @@ class Graficador:
         :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
             otro grafico sobre el mismo subplot.
         """
-        ax = self.obt_ax(saag)
+        ax = self.get_axis_actual(saag)
         ax.set_title(titulo)
         ax.scatter(x,y,c=c,s=s,marker=marker,edgecolor=ec,alpha=opaquedad,label=label)
         if label:
@@ -229,7 +296,7 @@ linea2.set_color_contorno_punto("#ffffff")
 
 # Set de graficos Numero uno #
 #Instancio clase
-graficador = Graficador(1,3,estilo=["seaborn"])
+graficador = Graficador(['0,0','0,1','0,2'],1,3,estilo=["seaborn"])
 
 #Realizo Grafico Uno
 graficador.g2d_graficar([1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left","Grafico de prueba",saag=False)
@@ -247,7 +314,7 @@ graficador.display_graficos()
 # Set de graficos Numero dos #
 
 # #Instancio clase
-graficador = Graficador(2,2,estilo=["seaborn"])
+graficador = Graficador(['0,0','0,1:','1,0','1,1:'],2,3,estilo=["seaborn"])
 
 #Realizo grafico numero uno
 linea.set_opaquedad(0.7)

@@ -20,6 +20,7 @@ class MPManager:
         self.vIndices = self.__instanciar_indices__(filas,col)
         self.index_actual = 0
         self.cant_graficos = len(self.vIndices)
+        self.cur_ax = self.vIndices[0]
 
 
     def __instanciar_indices__(self,filas,col):
@@ -40,7 +41,12 @@ class MPManager:
                 for j in range(col):
                     vIndices.append((i,j))
             return vIndices
-
+    """
+    def get_cur_axes(self,axes):
+        if(self.mono_fila_o_col):
+            return axes[self.vIndices[self.index_actual]]       
+       return axes[self.vIndices[self.index_actual][0], self.vIndices[self.index_actual][1]]
+      """
     def get_ax_agraficar(self,axes,saag):
         """
         :param axes: variable pertenenciente a la clase Axis que contiene tantas filas y columnas como se indico en la

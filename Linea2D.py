@@ -1,5 +1,6 @@
 class Linea2D:
-    def __init__(self,color="black",estiloPunto=".",estiloLinea="solid"):
+    def __init__(self,color="black",estiloPunto=".",estiloLinea="solid",tamPunto=1,
+                 opaquedad=1,anchoLinea=1):
         """
         Instancia caracteristicas basicas de una linea que se usaran para el grafico
 
@@ -10,9 +11,11 @@ class Linea2D:
         self.color = color
         self.estiloPunto = estiloPunto
         self.estiloLinea = estiloLinea
-        self.tamPunto = 1
+        self.tamPunto = tamPunto
         self.colorPunto = color
         self.colorContornoPunto = color
+        self.opaquedad = opaquedad
+        self.anchoLinea = anchoLinea
 
     def set_color(self,color):
         self.color = color
@@ -32,6 +35,11 @@ class Linea2D:
     def set_color_contorno_punto(self, color):
         self.colorContornoPunto = color
 
+    def set_opaquedad(self,opaquedad):
+        self.opaquedad = opaquedad
+
+    def set_ancholinea(self,ancho):
+        self.anchoLinea = ancho
 
 
 

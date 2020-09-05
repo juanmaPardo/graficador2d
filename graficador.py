@@ -8,6 +8,8 @@ from Linea2D import Linea2D
 
 
 #Librerias Graficadoras
+import matplotlib
+matplotlib.use('TkAgg')
 from matplotlib import pyplot as ppl
 import seaborn as sb
 
@@ -276,16 +278,58 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
-    def set_ax_metadata__(self,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
+    def g2d_barras(self,x,altura,c="#6369b3",ec="black",ancho_barra=0.8,opaquez=1,label=None,
+                   posLegend="upper right", saag=True):
+        """
+        Grafica un grafico de barras vertical
+        :param x: Coordenadas en el eje X
+        :param altura: Altura de la barra
+        :param c: Color de la barra
+        :param ec: Color del contorno de la barra
+        :param ancho_barra: Ancho de la barra
+        :param opaquez: Opaquez de la barra
+        :param label: Label del grafico
+        :param posLegend: Posicion donde se encontrara la leyenda
+        :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
+            otro grafico sobre el mismo subplot.
+        """
+        ax = self.get_axis_actual(saag)
+        ax.bar(x,altura,color=c,width=ancho_barra,edgecolor=ec,alpha=opaquez,label=label)
+        if label:
+            ax.legend(loc=posLegend)
+
+    def set_ax_ticks(self,indice_ax=None,x_ticks=None,x_labels=None,y_ticks=None,y_labels=None):
+        """
+        Cambia los valores que se muestran en el eje x/y de la axis indicada y cambia
+        dichos valores por los labels indicados en caso de ser necesario
+
+        :param indice_ax:
+        :param x_ticks: Coordenadas X a mostrar
+        :param x_labels: Labels de las coordendas X a mostrar
+        :param y_ticks: Coordendas Y a mostrar
+        :param y_labels: Labels de las coordendas Y a mostrar
+        """
+        if not indice_ax:
+            indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
+        ax = self.axes[indice_ax]
+        ppl.sca(ax)
+        ppl.xticks(x_ticks,x_labels)
+        ppl.yticks(y_ticks,y_labels)
+
+    def set_ax_metadata__(self,indice_ax=None,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
         """
         Define la metadata de la axis sobre la cual se esta trabajando
+        :param indice_ax: El indice de la ax sobre la cual queres efectuar los cambios,
+        por default siempre se tomara la ultima sobre la cual se grafico.
         :param titulo: Titulo del grafico
         :param x_label: label para el eje x
         :param y_label: label para el eje y
         :param x_font: Tamaño de la fuente del label para el eje x
         :param y_font: Tamaño de la fuente del label para el eje y
         """
-        ax = self.get_axis_actual(False)
+        if not indice_ax:
+            indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
+        ax = self.axes[indice_ax]
         ax.set_title(titulo)
         ax.set_xlabel(x_label,fontsize=x_font)
         ax.set_ylabel(y_label,fontsize=y_font)
@@ -350,6 +394,11 @@ graficador.set_ax_metadata__(titulo="Grafico tarta")
 graficador.grafico_tarta([21321,15689,26500],labels=["Perros","Loros","Tortugas"],anchoLinea=3,
                          colores=["#624848","#394f35","#f45ddc"],sombra=True,d_valores=True,
                          s_destacar="max",angulo_inicio=90)
+
+#Realizo grafico numero tres
+graficador.g2d_barras([1,2,3,4,5],[20,50,70,50,20],label="Barras")
+graficador.set_ax_metadata__(titulo="Grafico barras")
+graficador.set_ax_ticks(2,x_ticks=[1,2,3,4,5],x_labels=[15,20,25,30,35])
 
 #Hago un display de los graficos
 graficador.display_graficos()

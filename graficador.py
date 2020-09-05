@@ -276,12 +276,13 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
-    def g2d_barras(self,x,altura,c="#6369b3",ec="black",ancho_barra=0.8,opaquez=1,label=None,
+    def g2d_barras(self,x,altura,pos_barras="vertical",c="#6369b3",ec="black",ancho_barra=0.8,opaquez=1,label=None,
                    posLegend="upper right", saag=True):
         """
         Grafica un grafico de barras vertical
         :param x: Coordenadas en el eje X
         :param altura: Altura de la barra
+        :param pos_barras: vertical o horizontal
         :param c: Color de la barra
         :param ec: Color del contorno de la barra
         :param ancho_barra: Ancho de la barra
@@ -292,7 +293,10 @@ class Graficador:
             otro grafico sobre el mismo subplot.
         """
         ax = self.get_axis_actual(saag)
-        ax.bar(x,altura,color=c,width=ancho_barra,edgecolor=ec,alpha=opaquez,label=label)
+        if(pos_barras == "vertical"):
+            ax.bar(x,altura,color=c,width=ancho_barra,edgecolor=ec,alpha=opaquez,label=label)
+        else:
+            ax.barh(x,altura,color=c,height=ancho_barra,edgecolor=ec,alpha=opaquez,label=label)
         if label:
             ax.legend(loc=posLegend)
 
@@ -311,13 +315,14 @@ class Graficador:
             indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
         ax = self.axes[indice_ax]
         ppl.sca(ax)
-        ppl.xticks(x_ticks,x_labels)
-        ppl.yticks(y_ticks,y_labels)
+        ppl.xticks(x_ticks,labels=x_labels)
+        ppl.yticks(y_ticks,labels=y_labels)
+
 
     def set_ax_metadata__(self,indice_ax=None,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
         """
         Define la metadata de la axis sobre la cual se esta trabajando
-        :param indice_ax: El indice de la ax sobre la cual queres efectuar los cambios,
+        :param indice_ax: El indice de la axis sobre la cual queres efectuar los cambios,
         por default siempre se tomara la ultima sobre la cual se grafico.
         :param titulo: Titulo del grafico
         :param x_label: label para el eje x
@@ -331,6 +336,33 @@ class Graficador:
         ax.set_title(titulo)
         ax.set_xlabel(x_label,fontsize=x_font)
         ax.set_ylabel(y_label,fontsize=y_font)
+
+    def dibujar_linea(self,punto,desde,hasta,indice_ax=None,orientacion="horizontal",
+                      c="black",ls="solid",lw=1,posLegend="upper right", label=None):
+        """
+        Dibuja una linea con slope:0 horizontal o vertical sobre el punto y el rango indicado
+        :param punto: Punto Y(en caso que la linea sea horizontal) o X(en caso que sea vertical) sobre
+        el cual intersectara la recta con el eje correspondiente
+        :param desde: Desde el punto desde el cual comenzara
+        :param hasta: Hasta el punto al que llegara
+        :param indice_ax: El indice de la axis sobre la cual queres efectuar los cambios,
+        por default siempre se tomara la ultima sobre la cual se grafico.
+        :param orientacion: Horizontal o Vertical, por default sera horizontal
+        :param c: Color de la linea
+        :param ls: Tipo de linea, solid/dashed/dotted/...
+        :param lw: Ancho de la linea
+        :param posLegend: Posicion donde se encontrara la leyenda
+        :param label: Label asociado a la linea
+        """
+        if not indice_ax:
+            indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
+        ax = self.axes[indice_ax]
+        if(orientacion == "horizontal"):
+            ax.axhline(punto,desde,hasta,color=c,linestyle=ls,linewidth=lw,label=label)
+        else:
+            ax.axvline(punto,desde,hasta,color=c,linestyle=ls,linewidth=lw,label=label)
+        if label:
+            ax.legend(loc=posLegend)
 
     def display_graficos(self):
         """

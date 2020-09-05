@@ -59,6 +59,13 @@ graficador.grafico_tarta([21321,15689,26500],labels=["Perros","Loros","Tortugas"
 graficador.g2d_barras([1,2,3,4,5],[20,50,70,50,20],label="Barras")
 graficador.set_ax_metadata__(titulo="Grafico barras")
 graficador.set_ax_ticks(2,x_ticks=[1,2,3,4,5],x_labels=[15,20,25,30,35])
+graficador.dibujar_linea(40,0,3,label="Prueba linea horizontal")
+
+#Realizo grafico numero cuatro
+graficador.g2d_barras([1,2,3,4,5],[20,50,70,50,20],pos_barras="horizontal",label="Barras")
+graficador.set_ax_metadata__(titulo="Grafico barras horizontal")
+graficador.set_ax_ticks(3,y_ticks=[1,2,3,4,5],y_labels=[15,20,25,30,35])
+graficador.dibujar_linea(40,0,3,orientacion="vertical",label="Prueba linea vertical")
 
 #Hago un display de los graficos
 graficador.display_graficos()

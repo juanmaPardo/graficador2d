@@ -67,6 +67,17 @@ class Graficador:
             num1:_num2: = Desde la fila num1 en adelante desde la columna dos en adelante
             :num1_num2: = Todas las filas hasta la num1, desde la columna num2 en adelante
 
+            num1:num2,num3  = Desde la fila num1 hasta el num2(sin incluir) en la columna num3
+            num1:num2,num3: = Desde la fila num1 hasta el num2(sin incluir) de la columna num3 en adelante
+            num1:num2,:num3 = Desde la fila num1 hasta el num2(sin incluir) hasta la columna num3
+
+            num1,num2:num3 = Desde la columna num2 hasta la num3(sin incluir) en la fila num3
+            num1:,num2:num3 = Desde la columna num2 hasta la num3(sin incluir) de la fila num3 en adelante
+            :num1,num2:num3 = Desde la columna num2 hasta la num3(sin incluir) hasta la fila num3
+
+            num1:num2,num3:num4 = Desde la fila num1 hasta el num2(sin incluir),
+                                  Desde la columna num3 hasta la num4(sin incluir)
+
             :param proporcion: String que representa una proporcion a cubrir del grafico
             :return: El rango de grid que se va a utilizar en dicho subplot
             """
@@ -115,6 +126,44 @@ class Graficador:
                 n1 = int(prop[1])
                 n2 = int(prop[3])
                 return self.grid_spec[:n1, n2:]
+            if (len(prop) == 5 and prop[1] == ":" and prop[4].isdigit()):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                n3 = int(prop[4])
+                return self.grid_spec[n1:n2,n3]
+            if (len(prop) == 5 and prop[0].isdigit() and prop[3] == ":"):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                n3 = int(prop[4])
+                return self.grid_spec[n1,n2:n3]
+
+            if (len(prop)== 6 and prop[0].isdigit() and prop[2].isdigit() and prop[4]==":"):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                n3 = int(prop[5])
+                return self.grid_spec[n1:n2,:n3]
+            if (len(prop)== 6 and prop[0].isdigit() and prop[2].isdigit() and prop[5]==":"):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                n3 = int(prop[4])
+                return self.grid_spec[n1:n2,n3:]
+            if (len(prop)== 6 and prop[0] == ":"):
+                n1 = int(prop[1])
+                n2 = int(prop[3])
+                n3 = int(prop[5])
+                return self.grid_spec[:n1,n2:n3]
+            if (len(prop)== 6 and prop[0]==":" and prop[3].isdigit() and prop[5].isdigit()):
+                n1 = int(prop[0])
+                n2 = int(prop[3])
+                n3 = int(prop[5])
+                return self.grid_spec[n1:,n2:n3]
+
+            if (len(prop)==7):
+                n1 = int(prop[0])
+                n2 = int(prop[2])
+                n3 = int(prop[4])
+                n4 = int(prop[6])
+                return self.grid_spec[n1:n2, n3:n4]
 
         axes = []
         for i in range(len(proporciones)):
@@ -300,6 +349,34 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
+
+    def boxplot(self,data,labels=None,c_box="black",lw_box=1.2,lw_median=1.5,c_median="#2e3fff",c_outliers="red",
+                m_outliers="o",ms_outliers=5,posLegend="upper right"):
+        """
+        Grafica un box and whiskers plot
+        :param data: Vector o vectores(en caso de nececiitar mas de un plot) a graficar
+        :param labels: Labels para cada vector
+        :param c_box: Color de la caja
+        :param lw_box: Ancho de la linea de la caja
+        :param lw_median: Ancho de la linea del 50th quartile
+        :param c_median: Color de la linea del 50th quartile
+        :param c_outliers: Color de los outliers
+        :param m_outliers: Marker a utilizar para los outliers
+        :param ms_outliers: El tammaño del marker a utilizar para los outliers
+        :param posLegend: Posicion en la que se encontrara la leyenda
+        """
+        ax = self.get_axis_actual(True)
+        ax.boxplot(data,labels=labels,boxprops={'color':c_box,'linewidth':lw_box},
+                   flierprops={'marker':m_outliers,'markerfacecolor':c_outliers,'markersize':ms_outliers},
+                   medianprops={'linewidth':lw_median,'color':c_median})
+        if labels:
+            ax.legend(loc=posLegend)
+
+
+    def tabla_de_analisis(self,data):
+        data = np.array(data) if type(data) != np.ndarray else data
+        print(type(data))
+
     def set_ax_ticks(self,indice_ax=None,x_ticks=None,x_labels=None,y_ticks=None,y_labels=None):
         """
         Cambia los valores que se muestran en el eje x/y de la axis indicada y cambia
@@ -317,7 +394,6 @@ class Graficador:
         ppl.sca(ax)
         ppl.xticks(x_ticks,labels=x_labels)
         ppl.yticks(y_ticks,labels=y_labels)
-
 
     def set_ax_metadata__(self,indice_ax=None,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
         """
@@ -343,8 +419,8 @@ class Graficador:
         Dibuja una linea con slope:0 horizontal o vertical sobre el punto y el rango indicado
         :param punto: Punto Y(en caso que la linea sea horizontal) o X(en caso que sea vertical) sobre
         el cual intersectara la recta con el eje correspondiente
-        :param desde: Desde el punto desde el cual comenzara
-        :param hasta: Hasta el punto al que llegara
+        :param desde: Punto en caracter porcentual (0-1) desde donde comenzara la linea
+        :param hasta: Punto en caracter porcentual (0-1) hasta donde llegaragi   la linea
         :param indice_ax: El indice de la axis sobre la cual queres efectuar los cambios,
         por default siempre se tomara la ultima sobre la cual se grafico.
         :param orientacion: Horizontal o Vertical, por default sera horizontal

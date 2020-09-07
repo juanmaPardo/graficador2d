@@ -79,16 +79,25 @@ def set_de_graficos_numero_cuatro():
     graficador = Graficador(["0:2,0","2,0","0:2,1:","2:,1:"],filas=3,col=3,estilo="seaborn")
     #graficador = Graficador(["0,0"],filas=1,col=1,estilo="seaborn")
     data = np.array([1,2,3,4,4,5,5,2,6,2.5,6,5,4,8,-5,4.2,7,8,2.3,12,9,5,3,4,6,4.3,5.2,5,4,6.8,15])
-    mean = np.mean(data)
-    varianza = np.sum((data-mean)**2)/len(data)
-    desv_estandar = np.sqrt(varianza)
-    estandar_error = desv_estandar/np.sqrt(len(data))
-    print("mean={},varianza={},d_est={},std_err={}".format(mean,varianza,desv_estandar,estandar_error))
     graficador.boxplot(data)
-    graficador.tabla_de_analisis([1,2,3])
+
+    rowL = ["Mean","varianza","Desv_estandar","Std_err"]
+    mean = round(np.mean(data),2)
+    varianza = round(np.sum((data - mean) ** 2) / len(data),2)
+    desv_estandar = round(np.sqrt(varianza),2)
+    estandar_error = round(desv_estandar / np.sqrt(len(data)),2)
+    celInf = [[mean],[varianza],[desv_estandar],[estandar_error]]
+    colLabel = ["Flores"]
+    graficador.tabla(celInf,rowL,colLabel,c_celdas="#f6f6f6",c_rowL="#c176c8",c_colL="#4f4f4f")
+
+    
+    graficador.display_graficos()
 
 
 #set_de_graficos_uno()
 #set_de_graficos_numero_dos()
-#set_de_graficos_numero_tres()
+#set_de_graficos_numero_tres()("tal",2)
 set_de_graficos_numero_cuatro()
+
+
+

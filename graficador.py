@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from Linea2D import Linea2D
+import types
 
 
 #Librerias Graficadoras
@@ -373,9 +374,70 @@ class Graficador:
             ax.legend(loc=posLegend)
 
 
-    def tabla_de_analisis(self,data):
-        data = np.array(data) if type(data) != np.ndarray else data
-        print(type(data))
+    def tabla(self,data_celdas,row_labels,col_labels,posTextCeldas="center",c_colL="#c176c8",
+              posTextFilas="left",posTextCol="center", c_celdas="#f6f6f6",c_rowL="#4f4f4f"):
+        """
+        Grafica una tabla
+        :param data_celdas: Matriz que representa el valor que cada celda tendra
+        :param row_labels: Lista de la misma longitud que la cantidad de filas que tendra nuestra tabla
+        representando el label asociado a cada fila
+        :param col_labels: Lista de la misma longitud que la cantidad de columnas que tendra nuestra tabla
+        representando el label asociado a cada columna
+        :param posTextCeldas: Representa la alineacion del texto de las celdas center,right,left
+        :param posTextFilas: Representa la alineacion del texto de los labels que representan las filas center,right,left
+        :param posTextCol: Representa la alineacion del texto de los labels que representan las columnas center,right,left
+        :param c_celdas: Matriz con la misma shape que data_celdas que representa el color de cada celda, o
+        un string que represente un color que sera aplicado a todas las celdas
+        :param c_rowL:Lista de la misma longitud que la cantidad de filas que tendra nuestra tabla
+        representando el color de cada label, o un color en formato string que aplicara a todos los labels
+        :param c_colL: Lista de la misma longitud que la cantidad de columnas que tendra nuestra tabla
+        representando el color de cada label, o un color en formato string que aplicara a todos los labels
+        """
+        def is_numpy_string(array):
+            """
+            Evalua si un numpy array/matriz esta compuesto por strings
+            :param array: Numpy array
+            :return: True si el array es un vector de strings o una matriz de strings
+            """
+            if(len(array.shape) == 1):
+                return type(celdas_tabla[0]) == np.str_
+            elif(len(array.shape) == 2):
+                return type(celdas_tabla[0,0]) == np.str_
+            else:
+                raise Exception("El array no puede ser tridimencional")
+        def stringfy(array):
+            """
+            Transforma los elementos de un array o matriz a string
+            :param array: Numpy array
+            :return: String version de los elementos del array
+            """
+            arr = np.array(array) if type(array) != np.ndarray else array
+            if(len(array.shape) == 1):
+                return np.array(list(map(str,arr)))
+            elif(len(array.shape) == 2):
+                return np.array([list(map(str,fila)) for fila in celdas_tabla])
+            else:
+                raise Exception("El array no puede ser tridimencional")
+        def es_lista_elem(var):
+            """
+            Chekea si una variable es una lista un numpy array
+            :param var: Variable
+            :return: True si es una lista o np.array
+            """
+            return type(var) is list or type(var) is np.ndarray
+
+        celdas_tabla = np.array(data_celdas) if type(data_celdas) != np.ndarray else data_celdas
+        celdas_tabla = stringfy(celdas_tabla) if not is_numpy_string(celdas_tabla) else celdas_tabla
+        cant_fil = celdas_tabla.shape[0]
+        cant_col = celdas_tabla.shape[1]
+        c_celdas = [[c_celdas]*cant_col]*cant_fil if not es_lista_elem(c_rowL) else c_celdas
+        c_filas = [c_rowL]*cant_fil if not es_lista_elem(c_rowL) else np.array(c_rowL)[0:cant_fil]
+        c_columnas = [c_colL]*cant_col if not es_lista_elem(c_colL) else np.array(c_colL)[0:cant_col]
+        ax = self.get_axis_actual(True)
+        ax.axis("off")
+        ax.table(cellText=celdas_tabla,rowLabels=row_labels,colLabels=col_labels,cellLoc=posTextCeldas,
+                 cellColours=c_celdas,rowColours=c_filas,colColours=c_columnas,
+                 colLoc=posTextCol,rowLoc=posTextFilas,loc="center")
 
     def set_ax_ticks(self,indice_ax=None,x_ticks=None,x_labels=None,y_ticks=None,y_labels=None):
         """

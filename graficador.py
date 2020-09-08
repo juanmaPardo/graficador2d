@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from Linea2D import Linea2D
-import types
+from matplotlib.animation import FuncAnimation
 
 
 #Librerias Graficadoras
@@ -38,7 +38,6 @@ class Graficador:
         self.figura = ppl.figure(constrained_layout=True)
         self.grid_spec = self.figura.add_gridspec(filas,col)
         self.axes = self.__instanciar_axes__(proporciones)
-        self.cur_index = 0
 
     def __instanciar_axes__(self,proporciones):
         """
@@ -171,42 +170,35 @@ class Graficador:
             axes.append(self.figura.add_subplot(definir_gridspec(proporciones[i])))
         return axes
 
-    def get_axis_actual(self,saag):
-        """
-        :param saag: Valor booleano que define si el proximo grafico desea ser realizado
-        sobre la misma axis o no.
-        :return: Devuelve el subplot sobre el cual se debe realizar el siguiente grafico
-        """
-        cur_ax = self.axes[self.cur_index]
-        self.cur_index += 1 if saag else 0
-        return cur_ax
+    def set_real_time_on(self,animate_func,intervalo, *args):
+        ani = FuncAnimation(self.figura, lambda i: animate_func(i,args), interval=1000)
 
-    def g2d_graficar(self,x,y,linea,label=None,posLegend="upper right",saag=True):
+    def g2d_graficar(self,i_axis,x,y,linea,label=None,posLegend="upper right"):
         """
         Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
 
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x: Vector que representa los puntos en el eje horizontal
         :param y: Vector que representa los puntos en el eje vertical
         :param linea: Una instancia de la clase Linea2D
         :param label: Un string que represente el label del grafico
         :param posLegend: upper/lower/center + left/right todas las combinaciones
         :param title: Titulo del grafico
-        :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
-                    otro grafico sobre el mismo subplot.
         """
-        ax = self.get_axis_actual(saag)
+        ax = self.axes[i_axis]
         ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,alpha=linea.opaquedad,
                 mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label,
                 lw=linea.anchoLinea)
         if label:
             ax.legend(loc=posLegend)
 
-    def histograma(self,x,bins=None,tam_barra=None,color_barra="#5d82c9",color_borde="black",
+    def histograma(self,i_axis,x,bins=None,tam_barra=None,color_barra="#5d82c9",color_borde="black",
                    orientacion="vertical",label=None,posLegend="upper right", display_bins_ranges=False):
         """
         Realiza el grafico de un histograma en la axis correspondiente con la informacion que se
         le otorgo por parametro.
 
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x: Vector de valores observados
         :param bins: Una lista con bins custom
         :param tam_barra: Tamaño relativo de la barra
@@ -219,7 +211,7 @@ class Graficador:
         :param display_bins_ranges: True si queres que se muestren todos los rangos que determinan cada bien
                                     ya sea en el eje X o en el eje Y
         """
-        ax = self.get_axis_actual(True)
+        ax = self.axes[i_axis]
         (_,bins,_) = ax.hist(x,bins=bins,rwidth=tam_barra,orientation=orientacion,fc=color_barra,ec=color_borde)
         indices = bins[[i%2 == 0 for i in range(len(bins))]] if not display_bins_ranges else bins
         ppl.sca(ax)
@@ -227,10 +219,12 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
-    def histograma_conjunto(self,x1,x2,bins1=None,bins2=None,cbarrras=["#fcb27c","#5d82c9"],cbordes=["black","black"],display_bins_ranges=False,
+    def histograma_conjunto(self,i_axis,x1,x2,bins1=None,bins2=None,cbarrras=["#fcb27c","#5d82c9"],cbordes=["black","black"],display_bins_ranges=False,
                   orientacion="vertical",label=[None,None],posLegend="upper right"):
         """
         Grafica dos histogramas uno arriba del otro con objetivos de comparar resultados
+
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x1: Set de datos 1
         :param x2: Set de datos 2
         :param bins1: Bins custom para set de datos numero 1
@@ -243,7 +237,7 @@ class Graficador:
         :param posLegend: Posicion en donde queres que se encuentre la leyenda
         :param titulo: Titulo del grafico
         """
-        ax = self.get_axis_actual(True)
+        ax = self.axes[i_axis]
         (_,bins1,_) = ax.hist(x1,bins=bins1,alpha=0.8,rwidth=0.97,orientation=orientacion,fc=cbarrras[0],ec=cbordes[0],label=label[0])
         (_,bins2,_) = ax.hist(x2,bins=bins2,alpha=0.5,orientation=orientacion,fc=cbarrras[1],ec=cbordes[1],label=label[1])
         conc_bins = np.sort(np.concatenate((bins1,bins2),axis=None))
@@ -253,10 +247,11 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
-    def grafico_tarta(self,data,labels,colores=None,s_destacar=None,sombra=False,d_valores=False,
+    def grafico_tarta(self,i_axis,data,labels,colores=None,s_destacar=None,sombra=False,d_valores=False,
                       angulo_inicio=0,anchoLinea=1,opaquedad=1,posLegend="upper right"):
         """
         Realiza un grafico de tarta
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param data: Valores por categoria
         :param colores: Categoria respectiva a los valores
         :param s_destacar: Variable que se utiliza para destacar uno de los slices de la torta.
@@ -298,17 +293,18 @@ class Graficador:
                     estandar[pos_label[0][0]] = 0.1
             return estandar
 
-        ax = self.get_axis_actual(True)
+        ax = self.axes[i_axis]
         explode_list = get_explode_list(data,labels,s_destacar) if s_destacar else None
         auto_pct = make_autopct(data) if d_valores else "%1.1f%%"
         ax.pie(data,labels=labels,explode=explode_list,autopct=auto_pct,colors=colores, startangle=angulo_inicio,
                shadow=sombra,wedgeprops={'alpha':opaquedad,'lw':anchoLinea})
         ax.legend(loc=posLegend)
 
-    def g2d_dispersion(self,x,y,c="#552df4f7",s=None,marker="o",ec="face",label=None,posLegend="upper right",
-                       saag=True,opaquedad=1):
+    def g2d_dispersion(self,i_axis,x,y,c="#552df4f7",s=None,marker="o",ec="face",label=None,posLegend="upper right",
+                       opaquedad=1):
         """
         Grafica un grafico de dispersion
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x: Coordenadas X
         :param y: Coordenadas Y
         :param c: color de los puntos
@@ -318,18 +314,17 @@ class Graficador:
         :param label: label del grafico
         :param posLegend: Posicion donde se encontrara la legenda
         :param titulo: titulo del grafico
-        :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
-            otro grafico sobre el mismo subplot.
         """
-        ax = self.get_axis_actual(saag)
+        ax = self.axes[i_axis]
         ax.scatter(x,y,c=c,s=s,marker=marker,edgecolor=ec,alpha=opaquedad,label=label)
         if label:
             ax.legend(loc=posLegend)
 
-    def g2d_barras(self,x,altura,pos_barras="vertical",c="#6369b3",ec="black",ancho_barra=0.8,opaquez=1,label=None,
-                   posLegend="upper right", saag=True):
+    def g2d_barras(self,i_axis,x,altura,pos_barras="vertical",c="#6369b3",ec="black",ancho_barra=0.8,opaquez=1,label=None,
+                   posLegend="upper right"):
         """
         Grafica un grafico de barras vertical
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x: Coordenadas en el eje X
         :param altura: Altura de la barra
         :param pos_barras: vertical o horizontal
@@ -339,10 +334,8 @@ class Graficador:
         :param opaquez: Opaquez de la barra
         :param label: Label del grafico
         :param posLegend: Posicion donde se encontrara la leyenda
-        :param saag: Acronimo de "Switch axis after graphing" setear como Falso si se va a realizar
-            otro grafico sobre el mismo subplot.
         """
-        ax = self.get_axis_actual(saag)
+        ax = self.axes[i_axis]
         if(pos_barras == "vertical"):
             ax.bar(x,altura,color=c,width=ancho_barra,edgecolor=ec,alpha=opaquez,label=label)
         else:
@@ -351,10 +344,11 @@ class Graficador:
             ax.legend(loc=posLegend)
 
 
-    def boxplot(self,data,labels=None,c_box="black",lw_box=1.2,lw_median=1.5,c_median="#2e3fff",c_outliers="red",
+    def boxplot(self,i_axis,data,labels=None,c_box="black",lw_box=1.2,lw_median=1.5,c_median="#2e3fff",c_outliers="red",
                 m_outliers="o",ms_outliers=5,posLegend="upper right"):
         """
         Grafica un box and whiskers plot
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param data: Vector o vectores(en caso de nececiitar mas de un plot) a graficar
         :param labels: Labels para cada vector
         :param c_box: Color de la caja
@@ -366,7 +360,7 @@ class Graficador:
         :param ms_outliers: El tammaño del marker a utilizar para los outliers
         :param posLegend: Posicion en la que se encontrara la leyenda
         """
-        ax = self.get_axis_actual(True)
+        ax = self.axes[i_axis]
         ax.boxplot(data,labels=labels,boxprops={'color':c_box,'linewidth':lw_box},
                    flierprops={'marker':m_outliers,'markerfacecolor':c_outliers,'markersize':ms_outliers},
                    medianprops={'linewidth':lw_median,'color':c_median})
@@ -374,10 +368,12 @@ class Graficador:
             ax.legend(loc=posLegend)
 
 
-    def tabla(self,data_celdas,row_labels,col_labels,posTextCeldas="center",c_colL="#c176c8",
-              posTextFilas="left",posTextCol="center", c_celdas="#f6f6f6",c_rowL="#4f4f4f"):
+    def tabla(self,i_axis,data_celdas,row_labels=None,col_labels=None,posTextCeldas="center",c_colL=None,
+              posTextFilas="left",posTextCol="center", c_celdas="#f6f6f6",c_rowL=None,
+              c_borde = "black",text_font=15,c_texto="black",opaquez_texto=1,peso_texto="normal"):
         """
         Grafica una tabla
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param data_celdas: Matriz que representa el valor que cada celda tendra
         :param row_labels: Lista de la misma longitud que la cantidad de filas que tendra nuestra tabla
         representando el label asociado a cada fila
@@ -400,9 +396,9 @@ class Graficador:
             :return: True si el array es un vector de strings o una matriz de strings
             """
             if(len(array.shape) == 1):
-                return type(celdas_tabla[0]) == np.str_
+                return type(array[0]) == np.str_
             elif(len(array.shape) == 2):
-                return type(celdas_tabla[0,0]) == np.str_
+                return type(array[0,0]) == np.str_
             else:
                 raise Exception("El array no puede ser tridimencional")
         def stringfy(array):
@@ -415,9 +411,18 @@ class Graficador:
             if(len(array.shape) == 1):
                 return np.array(list(map(str,arr)))
             elif(len(array.shape) == 2):
-                return np.array([list(map(str,fila)) for fila in celdas_tabla])
+                return np.array([list(map(str,fila)) for fila in arr])
             else:
                 raise Exception("El array no puede ser tridimencional")
+        def get_celdas_tabla(data_celdas):
+            """
+            Transofmra la data de las celdas en el formato correcto para ser recibido en la funcion
+            table de matplotlib
+            :param data_celdas: Matriz/vector que representa la data que tendra nuestras celdas
+            :return: Numpy array representando la data de cada celda en formato string
+            """
+            celdas_tabla = np.array(data_celdas) if type(data_celdas) != np.ndarray else data_celdas
+            return stringfy(celdas_tabla) if not is_numpy_string(celdas_tabla) else celdas_tabla
         def es_lista_elem(var):
             """
             Chekea si una variable es una lista un numpy array
@@ -425,60 +430,93 @@ class Graficador:
             :return: True si es una lista o np.array
             """
             return type(var) is list or type(var) is np.ndarray
+        def get_color_celdas(colorCeldas,cant_filas,cant_col):
+            """
+            Devuelve el color de cada celda a traves de un array de la misma shape que la tabla
+            :param colorCeldas: Color que tendran las celdas
+            :param cant_filas: Cantidad de filas de la tabla
+            :paramm cant_col: Cantidad de columnas de la tabla
+            :return: Devuelve el color de cada celda a traves de un array de la misma shape que la tabla
+            """
+            if es_lista_elem(colorCeldas):
+                return colorCeldas
+            elif not colorCeldas:
+                return None
+            elif cant_fil == 1:
+                return [c_celdas] * cant_col
+            else:
+                return [[c_celdas] * cant_col] * cant_filas
+        def vectorizar_colores(colores,long):
+            """
+            Transforma a un string en una lista de colores de longitud #long
+            :param colores: String rerepsentando los colores, valor nulo, o vector de colores
+            :param long: Tamaño del vector
+            :return: Vector que representa una lista de colores.
+            """
+            if es_lista_elem(colores):
+                return colores
 
-        celdas_tabla = np.array(data_celdas) if type(data_celdas) != np.ndarray else data_celdas
-        celdas_tabla = stringfy(celdas_tabla) if not is_numpy_string(celdas_tabla) else celdas_tabla
+            elif not colores:
+                return None
+
+            return [colores]*long
+
+        celdas_tabla = get_celdas_tabla(data_celdas)
         cant_fil = celdas_tabla.shape[0]
         cant_col = celdas_tabla.shape[1]
-        c_celdas = [[c_celdas]*cant_col]*cant_fil if not es_lista_elem(c_rowL) else c_celdas
-        c_filas = [c_rowL]*cant_fil if not es_lista_elem(c_rowL) else np.array(c_rowL)[0:cant_fil]
-        c_columnas = [c_colL]*cant_col if not es_lista_elem(c_colL) else np.array(c_colL)[0:cant_col]
-        ax = self.get_axis_actual(True)
+        c_celdas = get_color_celdas(c_celdas,cant_fil,cant_col)
+        c_filas = vectorizar_colores(c_rowL,cant_fil)
+        c_columnas = vectorizar_colores(c_colL,cant_col)
+        ax = self.axes[i_axis]
         ax.axis("off")
-        ax.table(cellText=celdas_tabla,rowLabels=row_labels,colLabels=col_labels,cellLoc=posTextCeldas,
+        tabla = ax.table(cellText=celdas_tabla,rowLabels=row_labels,colLabels=col_labels,cellLoc=posTextCeldas,
                  cellColours=c_celdas,rowColours=c_filas,colColours=c_columnas,
                  colLoc=posTextCol,rowLoc=posTextFilas,loc="center")
 
-    def set_ax_ticks(self,indice_ax=None,x_ticks=None,x_labels=None,y_ticks=None,y_labels=None):
+        tabla.auto_set_font_size(False)
+        tabla.set_fontsize(text_font)
+        for i in range(cant_fil):
+            for j in range(cant_col):
+                cell= tabla[i,j]
+                cell.set_text_props(color=c_texto,fontweight=peso_texto,alpha=opaquez_texto)
+                cell.set_edgecolor(c_borde)
+
+    def set_ax_ticks(self,i_axis,x_ticks=None,x_labels=None,y_ticks=None,y_labels=None):
         """
         Cambia los valores que se muestran en el eje x/y de la axis indicada y cambia
         dichos valores por los labels indicados en caso de ser necesario
 
-        :param indice_ax:
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x_ticks: Coordenadas X a mostrar
         :param x_labels: Labels de las coordendas X a mostrar
         :param y_ticks: Coordendas Y a mostrar
         :param y_labels: Labels de las coordendas Y a mostrar
         """
-        if not indice_ax:
-            indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
-        ax = self.axes[indice_ax]
+        ax = self.axes[i_axis]
         ppl.sca(ax)
         ppl.xticks(x_ticks,labels=x_labels)
         ppl.yticks(y_ticks,labels=y_labels)
 
-    def set_ax_metadata__(self,indice_ax=None,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
+    def set_ax_metadata__(self,i_axis,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
         """
         Define la metadata de la axis sobre la cual se esta trabajando
-        :param indice_ax: El indice de la axis sobre la cual queres efectuar los cambios,
-        por default siempre se tomara la ultima sobre la cual se grafico.
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param titulo: Titulo del grafico
         :param x_label: label para el eje x
         :param y_label: label para el eje y
         :param x_font: Tamaño de la fuente del label para el eje x
         :param y_font: Tamaño de la fuente del label para el eje y
         """
-        if not indice_ax:
-            indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
-        ax = self.axes[indice_ax]
+        ax = self.axes[i_axis]
         ax.set_title(titulo)
         ax.set_xlabel(x_label,fontsize=x_font)
         ax.set_ylabel(y_label,fontsize=y_font)
 
-    def dibujar_linea(self,punto,desde,hasta,indice_ax=None,orientacion="horizontal",
+    def dibujar_linea(self,i_axis,punto,desde,hasta,indice_ax=None,orientacion="horizontal",
                       c="black",ls="solid",lw=1,posLegend="upper right", label=None):
         """
         Dibuja una linea con slope:0 horizontal o vertical sobre el punto y el rango indicado
+        :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param punto: Punto Y(en caso que la linea sea horizontal) o X(en caso que sea vertical) sobre
         el cual intersectara la recta con el eje correspondiente
         :param desde: Punto en caracter porcentual (0-1) desde donde comenzara la linea
@@ -492,9 +530,7 @@ class Graficador:
         :param posLegend: Posicion donde se encontrara la leyenda
         :param label: Label asociado a la linea
         """
-        if not indice_ax:
-            indice_ax = self.cur_index - 1 if self.cur_index >  0 else 0
-        ax = self.axes[indice_ax]
+        ax = self.axes[i_axis]
         if(orientacion == "horizontal"):
             ax.axhline(punto,desde,hasta,color=c,linestyle=ls,linewidth=lw,label=label)
         else:

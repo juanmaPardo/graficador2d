@@ -1,29 +1,18 @@
 from graficador import Graficador
-from Linea2D import Linea2D
 import numpy as np
 import time
 from matplotlib.animation import FuncAnimation
 import random
 
 def set_de_graficos_uno():
-    #Defino La linea
-    linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
-    linea.set_color_punto("#f45ddc")
-    linea.set_tamanio_punto(20)
-    linea.set_color_contorno_punto("#ffffff")
-
-    linea2 = Linea2D(color="#5d1313",estiloLinea="solid",estiloPunto="o")
-    linea2.set_color_punto("#d9bf36")
-    linea2.set_tamanio_punto(10)
-    linea2.set_color_contorno_punto("#ffffff")
 
     #Instancio clase
     graficador = Graficador(['0,0','0,1','0,2'],1,3,estilo=["seaborn"])
 
     #Realizo Grafico Uno
     graficador.set_ax_metadata__(0,titulo="Combinacion graficos",x_label="Eje x",y_label="Eje y")
-    graficador.g2d_graficar(0,[1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Dotted line","upper left")
-    graficador.g2d_graficar(0,[1,2,3,4,5,6],[6,5,4,3,2,1],linea2,"Solid line","upper center")
+    graficador.g2d_graficar(0,[1,2,3,4,5,6],[1,2,3,4,5,6],estilo_linea="dotted",label="Dotted line",posLegend="upper left")
+    graficador.g2d_graficar(0,[1,2,3,4,5,6],[6,5,4,3,2,1],label="Solid line",posLegend="upper center")
 
     #Realizo Grafico Dos
     graficador.set_ax_metadata__(1,titulo="Histograma")
@@ -43,18 +32,12 @@ def set_de_graficos_numero_dos():
     graficador.display_graficos()
 
 def set_de_graficos_numero_tres():
-    #Defino La linea
-    linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
-    linea.set_color_punto("#f45ddc")
-    linea.set_tamanio_punto(20)
-    linea.set_color_contorno_punto("#ffffff")
     # #Instancio clase
     graficador = Graficador(['0,0','0,1:','1,0','1,1:'],2,3,estilo=["seaborn"])
 
     #Realizo grafico numero uno
-    linea.set_opaquedad(0.7)
     graficador.set_ax_metadata__(0,titulo="Prueba Opaquidad")
-    graficador.g2d_graficar(0,[1,2,3,4,5,6],[1,2,3,4,5,6],linea,"Aproximation","upper left")
+    graficador.g2d_graficar(0,[1,2,3,4,5,6],[1,2,3,4,5,6],opaquez=0.77,c_marker="red",label="Aproximation",posLegend="upper left")
     graficador.g2d_dispersion(0,[1,2,3,4,5,6],[1.2,2.2,2.8,3.7,5.1,6],s=45,opaquedad=0.8,posLegend="upper left",label="Real")
 
     #Realizo grafico numero dos
@@ -112,49 +95,51 @@ def tabla_interactiva():
     graficador.display_graficos()
 
 def prueba_interactivo():
-    def animate(i,x,y,gf,linea):
+    def animate(i,x,y,gf):
         x.append(i)
         y.append(random.randint(0,1))
-        gf.g2d_graficar(0,x,y,linea)
+        gf.g2d_graficar(0,x,y)
 
     gf = Graficador(["0,0"],1,1,estilo="seaborn")
-    linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
-    linea.set_color_punto("#f45ddc")
-    linea.set_tamanio_punto(20)
-    linea.set_color_contorno_punto("#ffffff")
     y = []
     x = []
-    gf.set_real_time_on(animate,1000,fargs=(x,y,gf,linea))
+    gf.set_real_time_on(animate,1000,fargs=(x,y,gf))
 
 
 def prueba_interactivo_dos() :
-    def animate(i,x,y,gf,linea):
+    def animate(i,x,y,gf):
         x.append(i)
         y.append(random.randint(0,1))
-        gf.g2d_graficar(0,x,y,linea)
+        gf.g2d_graficar(0,x,y)
 
     gf = Graficador(["0,0","0,1"],1,2,estilo="seaborn")
-    linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
-    linea.set_color_punto("#f45ddc")
-    linea.set_tamanio_punto(20)
-    linea.set_color_contorno_punto("#ffffff")
     y = []
     x = []
-    gf.g2d_graficar(1,[1,2,3,4,5],[1,2,3,4,5],linea)
-    gf.set_real_time_on(animate,10,fargs=(x,y,gf,linea))
+    gf.g2d_graficar(1,[1,2,3,4,5],[1,2,3,4,5])
+    gf.set_real_time_on(animate,10,fargs=(x,y,gf))
 
+def prueba_coloreado():
+    graficador = Graficador(["0,0"],filas=1,col=1,estilo="seaborn")
+    graficador.g2d_graficar(0,[1,2,3,4],[1,2,3,4])
+    graficador.set_ax_metadata__(0,titulo="Prueba coloreado",x_label="Eje X",y_label="Eje Y",
+                                 x_font=25,y_font=25)
+    graficador.colorear_area(0,[1,2],[1,2],label="Area debajo de la curva",posLegend="upper left")
+    graficador.display_graficos()
 
-
-
+#2980b9
 #set_de_graficos_uno()
 #set_de_graficos_numero_dos()
 #set_de_graficos_numero_tres()
 #set_de_graficos_numero_cuatro()
 
-tabla_interactiva()
-
+#tabla_interactiva()
 #prueba_interactivo()
 #prueba_interactivo_dos()
+
+#prueba_coloreado()
+
+
+
 
 
 

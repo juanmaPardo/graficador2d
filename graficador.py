@@ -4,7 +4,6 @@ import numpy as np
 #Clases necesarias
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from Linea2D import Linea2D
 from matplotlib.animation import FuncAnimation
 from threading import Thread
 
@@ -524,20 +523,25 @@ class Graficador:
         ppl.xticks(x_ticks,labels=x_labels)
         ppl.yticks(y_ticks,labels=y_labels)
 
-    def set_ax_metadata__(self,i_axis,titulo=None,x_label=None,y_label=None,x_font=None,y_font=None):
+    def set_ax_metadata__(self,i_axis,titulo=None,fuente_titulo=20,x_label=None,y_label=None,
+                          x_font=None,y_font=None,c_t="black",c_x="black",c_y="black"):
         """
         Define la metadata de la axis sobre la cual se esta trabajando
         :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param titulo: Titulo del grafico
+        :param fuente_titulo: Tamaño de la fuente del titulo
         :param x_label: label para el eje x
         :param y_label: label para el eje y
         :param x_font: Tamaño de la fuente del label para el eje x
         :param y_font: Tamaño de la fuente del label para el eje y
+        :param c_x: Color de la fuente del eje X
+        :param c_y: Color de la fuente del eje Y
+        :param c_y: Color de la fuente del titulo
         """
         ax = self.axes[i_axis]
-        ax.set_title(titulo)
-        ax.set_xlabel(x_label,fontsize=x_font)
-        ax.set_ylabel(y_label,fontsize=y_font)
+        ax.set_title(titulo,fontsize=fuente_titulo,color=c_t)
+        ax.set_xlabel(x_label,fontsize=x_font,color=c_x)
+        ax.set_ylabel(y_label,fontsize=y_font,color=c_y)
 
     def dibujar_linea(self,i_axis,punto,desde,hasta,indice_ax=None,orientacion="horizontal",
                       c="black",ls="solid",lw=1,posLegend="upper right", label=None):
@@ -562,6 +566,24 @@ class Graficador:
             ax.axhline(punto,desde,hasta,color=c,linestyle=ls,linewidth=lw,label=label)
         else:
             ax.axvline(punto,desde,hasta,color=c,linestyle=ls,linewidth=lw,label=label)
+        if label:
+            ax.legend(loc=posLegend)
+
+    def colorear_area(self,i_axis,cord_x,cord_y,clausula=None,c="#2980b9",opaquez=0.88,label=None,posLegend="upper right"):
+        """
+        Colorea el area que va desde {cord_x[0],cord_y[0]} hasta{cord_x[n],cord_y[n]}
+        :param i_axis: Indice de la axis sobre la cual se desea colorear
+        :param cord_x: Lista que representa las coordendas x
+        :param cord_y: Lista que representa las coordenadas y
+        :param clausula: Lista compuesta de 'True','False' que indica que coordenadas debemos
+        omitir y cuales no
+        :param c: Color que se usara para pintar el area
+        :param opaquez: Opaquez que tendra el area
+        :param label: Label asociado al area
+        :param posLegend: Posicion en donde se encontrara la leyenda
+        """
+        ax = self.axes[i_axis]
+        ax.fill_between(cord_x,cord_y,where=clausula,color=c,alpha=opaquez,label=label)
         if label:
             ax.legend(loc=posLegend)
 

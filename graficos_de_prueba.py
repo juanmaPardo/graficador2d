@@ -96,20 +96,19 @@ def set_de_graficos_numero_cuatro():
     graficador.display_graficos()
 
 def tabla_interactiva():
-    def turn_white_and_black(vector):
-        return ["#ffffff" if x<0.5 else "#000000" for x in vector]
-    def turn_blank(vector):
-        return ["" for _ in vector]
+    def animate(i,graficador):
+        def turn_white_and_black(vector):
+            return ["#4f4f4f" if x < 0.5 else "#f6f6f6" for x in vector]
 
-    def animate(graficador):
-        matrix = np.random.rand(5,5)
+        def turn_blank(vector):
+            return ["" for _ in vector]
+        matrix = np.random.rand(20,20)
         black_and_white_matrix = np.array(list(map(turn_white_and_black,matrix)))
         empty_string_matrix = np.array(np.array(list(map(turn_blank,matrix))))
-        graficador.tabla(0,empty_string_matrix,c_celdas=black_and_white_matrix,c_borde="#d9bf36")
-        time.sleep(10)
+        graficador.tabla(0,empty_string_matrix,c_celdas=black_and_white_matrix)
         
     graficador = Graficador(["0,0"],filas=1,col=1,estilo="seaborn")
-    ani = FuncAnimation(graficador.figura,lambda i: animate(graficador),interval=1000)
+    graficador.set_real_time_on(animate,4000,fargs=[graficador])
     graficador.display_graficos()
 
 def prueba_interactivo():
@@ -152,10 +151,10 @@ def prueba_interactivo_dos() :
 #set_de_graficos_numero_tres()
 #set_de_graficos_numero_cuatro()
 
-#tabla_interactiva()
+tabla_interactiva()
 
 #prueba_interactivo()
-prueba_interactivo_dos()
+#prueba_interactivo_dos()
 
 
 

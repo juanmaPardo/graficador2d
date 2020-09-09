@@ -171,7 +171,6 @@ class Graficador:
             axes.append(self.figura.add_subplot(definir_gridspec(proporciones[i])))
         return axes
 
-
     def set_real_time_on(self,animate_func,intervalo, fargs=None):
         """
         Comienza un thread que se usara en paralelo al thread original para que tu funcion
@@ -191,23 +190,30 @@ class Graficador:
         rt_thread.start()
         rt_thread.join()
 
-
-    def g2d_graficar(self,i_axis,x,y,linea,label=None,posLegend="upper right"):
+    def g2d_graficar(self,i_axis,x,y,marker=".",c_linea="black",estilo_linea="solid",ancho_linea=1,opaquez=1,
+                     c_marker="black",ec_marker="black",tam_marker=1,label=None,posLegend="upper right"):
         """
         Genera un grafico con los puntos {(Xi,Yi)....(Xn,Yn)}
 
         :param i_axis =Indice de la axis sobre la cual se desea graficar
         :param x: Vector que representa los puntos en el eje horizontal
         :param y: Vector que representa los puntos en el eje vertical
-        :param linea: Una instancia de la clase Linea2D
+        :param marker: Estilo del punto. ., o, |,  _,
+        :param c_linea: Color de la linea
+        :param estilo_linea: Estilo de la linea. solid, dashed, dashdot, dotted
+        :param ancho_linea: Ancho de la linea.
+        :param opaquez: Opaquez de la linea
+        :param c_marker: Color del marcador de los puntos
+        :param ec_marker: Color deel contorno del marcador para los puntos
+        :param tam_marker: Tamaño del marcador de los puntos
         :param label: Un string que represente el label del grafico
         :param posLegend: upper/lower/center + left/right todas las combinaciones
         :param title: Titulo del grafico
         """
         ax = self.axes[i_axis]
-        ax.plot(x,y,color=linea.color,marker=linea.estiloPunto, linestyle=linea.estiloLinea,alpha=linea.opaquedad,
-                mfc=linea.colorPunto,ms=linea.tamPunto,mec=linea.colorContornoPunto,label=label,
-                lw=linea.anchoLinea)
+        ax.plot(x,y,color=c_linea,marker=marker, linestyle=estilo_linea,alpha=opaquez,
+                mfc=c_marker,ms=tam_marker,mec=ec_marker,label=label,
+                lw=ancho_linea)
         if label:
             ax.legend(loc=posLegend)
 
@@ -388,7 +394,7 @@ class Graficador:
 
 
     def tabla(self,i_axis,data_celdas,row_labels=None,col_labels=None,posTextCeldas="center",c_colL=None,
-              posTextFilas="left",posTextCol="center", c_celdas="#f6f6f6",c_rowL=None,
+              posTextFilas="left",posTextCol="center", c_celdas="#f6f6f6",c_rowL=None, special_cell_props=False,
               c_borde = "black",text_font=15,c_texto="black",opaquez_texto=1,peso_texto="normal"):
         """
         Grafica una tabla
@@ -401,6 +407,7 @@ class Graficador:
         :param posTextCeldas: Representa la alineacion del texto de las celdas center,right,left
         :param posTextFilas: Representa la alineacion del texto de los labels que representan las filas center,right,left
         :param posTextCol: Representa la alineacion del texto de los labels que representan las columnas center,right,left
+        :param special_cell_props: True si se quiere setear caracteristicas especiales referente a la celda
         :param c_celdas: Matriz con la misma shape que data_celdas que representa el color de cada celda, o
         un string que represente un color que sera aplicado a todas las celdas
         :param c_rowL:Lista de la misma longitud que la cantidad de filas que tendra nuestra tabla
@@ -494,11 +501,12 @@ class Graficador:
 
         tabla.auto_set_font_size(False)
         tabla.set_fontsize(text_font)
-        for i in range(cant_fil):
-            for j in range(cant_col):
-                cell= tabla[i,j]
-                cell.set_text_props(color=c_texto,fontweight=peso_texto,alpha=opaquez_texto)
-                cell.set_edgecolor(c_borde)
+        if(special_cell_props):
+            for i in range(cant_fil):
+                for j in range(cant_col):
+                    cell= tabla[i,j]
+                    cell.set_text_props(color=c_texto,fontweight=peso_texto,alpha=opaquez_texto)
+                    cell.set_edgecolor(c_borde)
 
     def set_ax_ticks(self,i_axis,x_ticks=None,x_labels=None,y_ticks=None,y_labels=None):
         """

@@ -6,6 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from Linea2D import Linea2D
 from matplotlib.animation import FuncAnimation
+from threading import Thread
 
 
 #Librerias Graficadoras
@@ -170,8 +171,26 @@ class Graficador:
             axes.append(self.figura.add_subplot(definir_gridspec(proporciones[i])))
         return axes
 
-    def set_real_time_on(self,animate_func,intervalo, *args):
-        ani = FuncAnimation(self.figura, lambda i: animate_func(i,args), interval=1000)
+
+    def set_real_time_on(self,animate_func,intervalo, fargs=None):
+        """
+        Comienza un thread que se usara en paralelo al thread original para que tu funcion
+        reciba los datos correspondientes y los grafique a tiempo real pero que al mismo tiempo
+        puedas generar otros graficos en el thread propio del main
+
+        :param animate_func: Funcion que se usara para recibir datos a tiempo real y generar el grafico
+        :param intervalo: Intervalo de tiempo que se usara para llamar nuevamente a animate_func
+        :param fargs: Tupla que representa los argumentos extra(ademas del intervalo) que nececita
+        tu funcion animate_func
+        """
+        def comenzar_intervalo():
+            ani = FuncAnimation(self.figura,animate_func,fargs=fargs, interval=intervalo)
+            self.display_graficos()
+
+        rt_thread = Thread(target=comenzar_intervalo)
+        rt_thread.start()
+        rt_thread.join()
+
 
     def g2d_graficar(self,i_axis,x,y,linea,label=None,posLegend="upper right"):
         """

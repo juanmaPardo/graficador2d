@@ -3,6 +3,7 @@ from Linea2D import Linea2D
 import numpy as np
 import time
 from matplotlib.animation import FuncAnimation
+import random
 
 def set_de_graficos_uno():
     #Defino La linea
@@ -104,21 +105,57 @@ def tabla_interactiva():
         matrix = np.random.rand(5,5)
         black_and_white_matrix = np.array(list(map(turn_white_and_black,matrix)))
         empty_string_matrix = np.array(np.array(list(map(turn_blank,matrix))))
-        graficador.tabla(empty_string_matrix,c_celdas=black_and_white_matrix)
-        time.sleep(2)
+        graficador.tabla(0,empty_string_matrix,c_celdas=black_and_white_matrix,c_borde="#d9bf36")
+        time.sleep(10)
         
     graficador = Graficador(["0,0"],filas=1,col=1,estilo="seaborn")
     ani = FuncAnimation(graficador.figura,lambda i: animate(graficador),interval=1000)
     graficador.display_graficos()
 
+def prueba_interactivo():
+    def animate(i,x,y,gf,linea):
+        x.append(i)
+        y.append(random.randint(0,1))
+        gf.g2d_graficar(0,x,y,linea)
+
+    gf = Graficador(["0,0"],1,1,estilo="seaborn")
+    linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
+    linea.set_color_punto("#f45ddc")
+    linea.set_tamanio_punto(20)
+    linea.set_color_contorno_punto("#ffffff")
+    y = []
+    x = []
+    gf.set_real_time_on(animate,1000,fargs=(x,y,gf,linea))
 
 
-set_de_graficos_uno()
-set_de_graficos_numero_dos()
-set_de_graficos_numero_tres()
-set_de_graficos_numero_cuatro()
+def prueba_interactivo_dos() :
+    def animate(i,x,y,gf,linea):
+        x.append(i)
+        y.append(random.randint(0,1))
+        gf.g2d_graficar(0,x,y,linea)
+
+    gf = Graficador(["0,0","0,1"],1,2,estilo="seaborn")
+    linea = Linea2D(color="#c82b35",estiloLinea="dotted",estiloPunto=".")
+    linea.set_color_punto("#f45ddc")
+    linea.set_tamanio_punto(20)
+    linea.set_color_contorno_punto("#ffffff")
+    y = []
+    x = []
+    gf.g2d_graficar(1,[1,2,3,4,5],[1,2,3,4,5],linea)
+    gf.set_real_time_on(animate,10,fargs=(x,y,gf,linea))
+
+
+
+
+#set_de_graficos_uno()
+#set_de_graficos_numero_dos()
+#set_de_graficos_numero_tres()
+#set_de_graficos_numero_cuatro()
 
 #tabla_interactiva()
+
+#prueba_interactivo()
+prueba_interactivo_dos()
 
 
 

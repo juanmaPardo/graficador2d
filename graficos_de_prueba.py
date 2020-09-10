@@ -126,6 +126,13 @@ def prueba_coloreado():
     graficador.colorear_area(0,[1,2],[1,2],label="Area debajo de la curva",posLegend="upper left")
     graficador.display_graficos()
 
+
+def discreto_vs_continuo():
+    gf = Graficador(["0,0","0,1"],filas=1,col=2,estilo="seaborn")
+    gf.g2d_graficar(0,[1,2,3,4,5],[1,2,3,4,5],c_linea="#d16f6f",label="Continuo")
+    gf.g2d_grafico_discreto(1,[1,2,3,4,5],[1,2,3,4,5],label="Discreto")
+    gf.display_graficos()
+
 #2980b9
 #set_de_graficos_uno()
 #set_de_graficos_numero_dos()
@@ -138,6 +145,7 @@ def prueba_coloreado():
 
 #prueba_coloreado()
 
+discreto_vs_continuo()
 
 
 

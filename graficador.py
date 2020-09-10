@@ -367,6 +367,38 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
+    def g2d_grafico_discreto(self,i_axis,x,y,estilo_linea="-",c_linea="#83b0f2",ancho_linea=1,marker="o",baseline=True,c_baseline="#d16f6f",
+                             c_marker="#83b0f2",ec_marker="white",tam_marker=8,label=None,posLegend="upper right"):
+        """
+        Grafica un grafico discreto
+        :param i_axis: Axis donde realizar el grafico
+        :param x: COordenadas x
+        :param y: Coordenadas Y
+        :param estilo_linea: Estlo de la linea "-","--",...
+        :param c_linea: Color de la linea
+        :param ancho_linea: Ancho de la linea
+        :param marker: Tipo de marcador
+        :param baseline: True si se quiere una baseline, False en caso contrario
+        :param c_baseline: Color de la baseline
+        :param c_marker: Color del marcador
+        :param ec_marker: Color del contorno del marcador
+        :param tam_marker: Tamaño del marcador
+        :param label: Label asociado
+        :param posLegend: Posicion en donde queres que se encuentre la leyenda
+        """
+        ax = self.axes[i_axis]
+        (markerline, stemlines, baseline) = ax.stem(x,y,linefmt=estilo_linea,markerfmt=marker,label=label)
+        stemlines.set_color(c_linea)
+        stemlines.set_linewidth(ancho_linea)
+        markerline.set_color(c_marker)
+        markerline.set_markeredgecolor(ec_marker)
+        markerline.set_markersize(tam_marker)
+        if(baseline):
+            baseline.set_color(c_baseline)
+        else:
+            baseline.set_linewidth(0)
+        if label:
+            ax.legend(loc=posLegend)
 
     def boxplot(self,i_axis,data,labels=None,c_box="black",lw_box=1.2,lw_median=1.5,c_median="#2e3fff",c_outliers="red",
                 m_outliers="o",ms_outliers=5,posLegend="upper right"):
@@ -586,6 +618,8 @@ class Graficador:
         ax.fill_between(cord_x,cord_y,where=clausula,color=c,alpha=opaquez,label=label)
         if label:
             ax.legend(loc=posLegend)
+
+
 
     def display_graficos(self):
         """

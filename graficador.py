@@ -6,6 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from threading import Thread
+from matplotlib import dates as mpl_dates
 
 
 #Librerias Graficadoras
@@ -387,16 +388,16 @@ class Graficador:
         :param posLegend: Posicion en donde queres que se encuentre la leyenda
         """
         ax = self.axes[i_axis]
-        (markerline, stemlines, baseline) = ax.stem(x,y,linefmt=estilo_linea,markerfmt=marker,label=label)
+        (markerline, stemlines, basel) = ax.stem(x,y,linefmt=estilo_linea,markerfmt=marker,label=label)
         stemlines.set_color(c_linea)
         stemlines.set_linewidth(ancho_linea)
         markerline.set_color(c_marker)
         markerline.set_markeredgecolor(ec_marker)
         markerline.set_markersize(tam_marker)
         if(baseline):
-            baseline.set_color(c_baseline)
+            basel.set_color(c_baseline)
         else:
-            baseline.set_linewidth(0)
+            basel.set_linewidth(0)
         if label:
             ax.legend(loc=posLegend)
 
@@ -554,6 +555,17 @@ class Graficador:
         ppl.sca(ax)
         ppl.xticks(x_ticks,labels=x_labels)
         ppl.yticks(y_ticks,labels=y_labels)
+
+    def format_date_axis(self,i_axis):
+        """
+        Formatea de una manera mas visiblemente agradable el eje x de la axis indicada.
+        Obviamente asume que dicho eje esta compuesto por fechas.
+        :param i_axis: Axis sobre la cual se desea trabajar
+        """
+        ax = self.axes[i_axis]
+        date_format = mpl_dates.DateFormatter('%b, %d %Y')
+        ax.get_xaxis().set_major_formatter(date_format)
+        ppl.setp(ax.get_xticklabels(), rotation=30, ha="right")
 
     def set_ax_metadata__(self,i_axis,titulo=None,fuente_titulo=20,x_label=None,y_label=None,
                           x_font=None,y_font=None,c_t="black",c_x="black",c_y="black"):

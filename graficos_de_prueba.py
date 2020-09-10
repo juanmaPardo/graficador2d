@@ -3,6 +3,7 @@ import numpy as np
 import time
 from matplotlib.animation import FuncAnimation
 import random
+from datetime import datetime, timedelta
 
 def set_de_graficos_uno():
 
@@ -133,6 +134,22 @@ def discreto_vs_continuo():
     gf.g2d_grafico_discreto(1,[1,2,3,4,5],[1,2,3,4,5],label="Discreto")
     gf.display_graficos()
 
+def prueba_fechas():
+    dates = [
+        datetime(2019, 5, 24),
+        datetime(2019, 5, 25),
+        datetime(2019, 5, 26),
+        datetime(2019, 5, 27),
+        datetime(2019, 5, 28),
+        datetime(2019, 5, 29),
+        datetime(2019, 5, 30)
+    ]
+
+    gf = Graficador(["0,0:"],filas=1,col=2,estilo="seaborn")
+    gf.g2d_grafico_discreto(0,dates,[4,5,3,5,6,3,5],baseline=False)
+    gf.format_date_axis(0)
+    gf.display_graficos()
+
 #2980b9
 #set_de_graficos_uno()
 #set_de_graficos_numero_dos()
@@ -145,7 +162,9 @@ def discreto_vs_continuo():
 
 #prueba_coloreado()
 
-discreto_vs_continuo()
+#discreto_vs_continuo()
+
+prueba_fechas()
 
 
 

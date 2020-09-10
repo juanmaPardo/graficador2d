@@ -150,6 +150,20 @@ def prueba_fechas():
     gf.format_date_axis(0)
     gf.display_graficos()
 
+
+def prueba_contornos():
+    gf = Graficador(["0:,0","0:,1"],filas=2,col=2,estilo="seaborn")
+    X = np.array([1,2,3,4,5])
+    Y = np.array([1,2,3,4,5])
+    Z = np.zeros(shape=(X.shape[0],Y.shape[0]))
+    Z[0,0]= 5
+    Z[1,1]= 5
+    Z[2,2]= 5
+    Z[2,2]= 5
+    Z[3,3]= 5
+    gf.g2d_contour(0,X,Y,Z,niveles=5,display_level=False,fcontour=False)
+    gf.display_graficos()
+
 #2980b9
 #set_de_graficos_uno()
 #set_de_graficos_numero_dos()
@@ -164,8 +178,9 @@ def prueba_fechas():
 
 #discreto_vs_continuo()
 
-prueba_fechas()
+#prueba_fechas()
 
+prueba_contornos()
 
 
 

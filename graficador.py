@@ -7,6 +7,8 @@ from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from threading import Thread
 from matplotlib import dates as mpl_dates
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
 
 
 #Librerias Graficadoras
@@ -401,6 +403,53 @@ class Graficador:
         if label:
             ax.legend(loc=posLegend)
 
+    def g2d_contour(self,i_axis,coord_x,coord_y,matriz_alturas,display_level=True,cmap="Greys",
+                    niveles=None,colorbar=True,fcontour=False,label=None,posLegend="upper right"):
+        """
+        Grafica un contour plot, que basicamente es una representacion 2D de un grafico 3D
+        si lo cortamos con un plano en #niveles capas. La idea es tener una coordenada X,Y
+        que la transformamos en un meshgrid para poder tener todos los puntos que forman
+        esos dos vectores, junto a una matriz Z de shape [x.shape[0],y.shape[0]] que te dice
+        la altura que tiene cada uno de esos puntos.
+
+        :param i_axis: Eje sobre el cual vamos a graficar
+        :param coord_x: Puntos X a utilizar
+        :param coord_y: Puntos Y a utilizar
+        :param matriz_alturas: matriz Z de shape [coord_x.shape[0],coord_y.shape[0]] que representa
+        la altura de cada uno de los puntos que surgen como combinacion de ambos vectores
+        :param display_level: En caso que se quiera hacer un display textual del nivel en donde
+        corta cada plano
+        :param cmap: String que represente un colormap valido en pyplot
+        :param niveles: Cantidad de niveles en los que deseamos hacer un corte
+        :param colorbar: True por default, para mostrar el color asociado a cada nivel.
+        :param fcontour: True en caso que se quiera realizar un contourf plot
+        :param label: Label asociado al grafico
+        :param posLegend: Posicion en donde queremos que se encuentre la leyenda
+
+        """
+        def realizar_grafico(vmin,vmax):
+            """
+            Realiza el grafico contour correspondiente y devuelve el resultado
+            :return: instancia de QuadContourSet
+            """
+            X, Y = np.meshgrid(coord_x, coord_y)
+            if not fcontour:
+                return ax.contour(X, Y, matriz_alturas, cmap=cmap, levels=niveles, norm=Normalize(vmin=vmin, vmax=vmax))
+            else:
+                return ax.contourf(X, Y, matriz_alturas, cmap=cmap, levels=niveles, norm=Normalize(vmin=vmin,vmax=vmax))
+        ax = self.axes[i_axis]
+        vmin, vmax = np.amin(matriz_alturas), np.amax(matriz_alturas)
+        ct = realizar_grafico(vmin,vmax)
+        if colorbar:
+            cbar = ppl.colorbar(ScalarMappable(norm=Normalize(vmin=vmin, vmax=vmax), cmap=cmap), ax=ax,aspect=45)
+            cbar.solids.set_rasterized(True)
+            cbar.solids.set_edgecolor("face")
+        if display_level:
+            ax.clabel(ct,inline=1,fontsize=8)
+        if label:
+            ax.legend(loc=posLegend)
+
+
     def boxplot(self,i_axis,data,labels=None,c_box="black",lw_box=1.2,lw_median=1.5,c_median="#2e3fff",c_outliers="red",
                 m_outliers="o",ms_outliers=5,posLegend="upper right"):
         """
@@ -556,14 +605,22 @@ class Graficador:
         ppl.xticks(x_ticks,labels=x_labels)
         ppl.yticks(y_ticks,labels=y_labels)
 
-    def format_date_axis(self,i_axis):
+    def format_date_axis(self,i_axis,day=True,month=True,year=True):
         """
         Formatea de una manera mas visiblemente agradable el eje x de la axis indicada.
         Obviamente asume que dicho eje esta compuesto por fechas.
         :param i_axis: Axis sobre la cual se desea trabajar
         """
+        def get_date_format(day,month,year):
+            format = ""
+            format += "%b," if month else ""
+            format += "%d " if day else ""
+            format += "%Y" if year else ""
+            return format
+
         ax = self.axes[i_axis]
-        date_format = mpl_dates.DateFormatter('%b, %d %Y')
+        format = get_date_format(day,month,year)
+        date_format = mpl_dates.DateFormatter(format)
         ax.get_xaxis().set_major_formatter(date_format)
         ppl.setp(ax.get_xticklabels(), rotation=30, ha="right")
 
@@ -630,8 +687,6 @@ class Graficador:
         ax.fill_between(cord_x,cord_y,where=clausula,color=c,alpha=opaquez,label=label)
         if label:
             ax.legend(loc=posLegend)
-
-
 
     def display_graficos(self):
         """

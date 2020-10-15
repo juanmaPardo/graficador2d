@@ -212,6 +212,32 @@ class Graficador:
         :param posLegend: upper/lower/center + left/right todas las combinaciones
         :param title: Titulo del grafico
         """
+        def is_sorted(x):
+            """
+            Devuelve True si el array esta ordenado. Si no esta ordenado vamos a tener que
+            arreglarlo porque matplotlib lo grafica mal si las coordendas x no estan ordenadas
+            :param x: Coordenadas x
+            :return: True si esta ordenado, False de caso contrario
+            """
+            return all(x[i] <= x[i + 1] for i in range(len(x) - 1))
+
+        def sort_and_align(x,y):
+            """
+            Devuelve la coordenada x ordenada y ajusta los valores de y para que se encuentren
+            en la posicion a la coordenada x a la que hacen referencia
+            :param x: Coordenada X
+            :param y: Coordenada Y
+            :return: (x,y) con x ordenado y Y alineado para que los valores de las coordenadas
+            x esten asociados al mismo valor de y que estaban asaociados anteriormente
+            """
+            arg_sort = np.argsort(x)
+            sorted_x_y = np.array([[x[i],y[i]] for i in arg_sort])
+            x = sorted_x_y[:,0].reshape(-1)
+            y = sorted_x_y[:,1].reshape(-1)
+            return x,y
+
+        if(not is_sorted(x)):
+            x,y = sort_and_align(x,y)
         ax = self.axes[i_axis]
         ax.plot(x,y,color=c_linea,marker=marker, linestyle=estilo_linea,alpha=opaquez,
                 mfc=c_marker,ms=tam_marker,mec=ec_marker,label=label,

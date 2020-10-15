@@ -86,7 +86,7 @@ def tabla_interactiva():
 
         def turn_blank(vector):
             return ["" for _ in vector]
-        matrix = np.random.rand(20,20)
+        matrix = np.random.rand(5,5)
         black_and_white_matrix = np.array(list(map(turn_white_and_black,matrix)))
         empty_string_matrix = np.array(np.array(list(map(turn_blank,matrix))))
         graficador.tabla(0,empty_string_matrix,c_celdas=black_and_white_matrix)
@@ -165,12 +165,12 @@ def prueba_contornos():
     gf.display_graficos()
 
 #2980b9
-#set_de_graficos_uno()
-#set_de_graficos_numero_dos()
-#set_de_graficos_numero_tres()
-#set_de_graficos_numero_cuatro()
+set_de_graficos_uno()
+set_de_graficos_numero_dos()
+set_de_graficos_numero_tres()
+set_de_graficos_numero_cuatro()
 
-#tabla_interactiva()
+tabla_interactiva()
 #prueba_interactivo()
 #prueba_interactivo_dos()
 
@@ -180,7 +180,7 @@ def prueba_contornos():
 
 #prueba_fechas()
 
-prueba_contornos()
+#prueba_contornos()
 
 
 

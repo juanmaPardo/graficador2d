@@ -164,13 +164,34 @@ def prueba_contornos():
     gf.g2d_contour(0,X,Y,Z,niveles=5,display_level=False,fcontour=False)
     gf.display_graficos()
 
-#2980b9
-set_de_graficos_uno()
-set_de_graficos_numero_dos()
-set_de_graficos_numero_tres()
-set_de_graficos_numero_cuatro()
+def prueba_matriz_confusion_sin_categorias():
+    gf = Graficador(["0,0"], filas=2, col=2, estilo="seaborn")
+    matriz = np.array([[25, 0, 0, 0, 0],
+                       [2, 30, 1, 0, 0],
+                       [1, 0, 45, 0, 5],
+                       [0, 0, 2, 62, 4],
+                       [1, 0, 3, 0, 29]])
+    gf.matriz_de_confusion(0,matriz)
+    gf.display_graficos()
 
-tabla_interactiva()
+def prueba_matriz_confusion_con_categorias():
+    gf = Graficador(["0,0"], filas=1, col=1, estilo="seaborn")
+    matriz = np.array([[25,0,0,0,0],
+                      [2,30,1,0,0],
+                      [1,0,45,0,5],
+                      [0,0,2,62,4],
+                      [1,0,3,0,29]])
+    gf.matriz_de_confusion(0,matriz,labels_categorias=["Gato","Perro","Cerdo","Caballo","Vaca"])
+    gf.display_graficos()
+
+
+#2980b9
+#set_de_graficos_uno()
+#set_de_graficos_numero_dos()
+#set_de_graficos_numero_tres()
+#set_de_graficos_numero_cuatro()
+
+#tabla_interactiva()
 #prueba_interactivo()
 #prueba_interactivo_dos()
 
@@ -181,6 +202,9 @@ tabla_interactiva()
 #prueba_fechas()
 
 #prueba_contornos()
+
+prueba_matriz_confusion_con_categorias()
+prueba_matriz_confusion_sin_categorias()
 
 
 

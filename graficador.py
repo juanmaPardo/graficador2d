@@ -1,19 +1,21 @@
 #Librerias helpers
 import numpy as np
+from pandas import DataFrame
 
 #Clases necesarias
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from matplotlib.animation import FuncAnimation
 from threading import Thread
 from matplotlib import dates as mpl_dates
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
+import matplotlib.font_manager as fm
+from matplotlib.collections import QuadMesh
+
 
 
 #Librerias Graficadoras
 from matplotlib import pyplot as ppl
-import seaborn as sb
+import seaborn as sn
 
 
 class Graficador:
@@ -713,6 +715,192 @@ class Graficador:
         ax.fill_between(cord_x,cord_y,where=clausula,color=c,alpha=opaquez,label=label)
         if label:
             ax.legend(loc=posLegend)
+
+    def matriz_de_confusion(self,i_axis,matriz,labels_categorias=[],cmap="Oranges",fmt='.2f',tam_fuente=11,ancho_linea=0.8):
+        """
+        Este funcion no fue realizada por mi sino que fue sacada de github y adaptada para que
+        funcione en mi codigo. La idea es la de realizar un 'pretty print' de una matriz de confusion.
+        Autor del codigo: https://github.com/wcipriano/pretty-print-confusion-matrix/blob/master/confusion_matrix_pretty_print.py
+
+        :param i_axis: Axis sobre la cual realizar el grafico
+        :param matriz: Matriz a graficar
+        :param labels_categorias = Lista que representa los labels de cada categoria para la matriz
+        de confusion en el orden en el que se encuentra representando en la matriz.
+        :param cmap = color map valido
+        :param tam_fuente = Tamaño de la fuente para el texto
+        :param ancho_linea = Ancho de la linea para las celdas.
+        """
+        def instanciar_data_frame(matriz,labels_categorias):
+            """
+            Instancia un data frame con la matriz y labels otorgados
+            :param matriz: Matriz de confusion
+            :param labels_categorias: Labels propios de la matriz de confusion
+            :return: Un dataframe en donde el index tanto de las filas y columnas esta dado por los labels(en caso que fuueron suministrados) y los
+            valores estan dado por aquellos que se encuentran contenidos en la matriz
+            """
+            labels = (len(labels_categorias) != 0)
+            if matriz.shape[0] != matriz.shape[1] or (labels and len(labels_categorias) != matriz.shape[0]):
+                raise Exception("Las matrices de confusion son cuadradas, y los labels deben ser acordes a la matriz")
+            dimension = matriz.shape[0]
+            df = DataFrame(matriz,index=labels_categorias,columns=labels_categorias) if labels else DataFrame(matriz,index=range(dimension),columns=range(dimension))
+            return df
+
+        def insert_totals(df_cm):
+            """
+            Agrega una fila y columna extra en donde se encontraran los valores totales
+            tanto para filas como columnas
+            """
+            sum_col = []
+            for c in df_cm.columns:
+                sum_col.append(df_cm[c].sum())
+            sum_lin = []
+            for item_line in df_cm.iterrows():
+                sum_lin.append(item_line[1].sum())
+            df_cm['sum_lin'] = sum_lin
+            sum_col.append(np.sum(sum_lin))
+            df_cm.loc['sum_col'] = sum_col
+
+        def configcell_text_and_colors(array_df, lin, col, oText, facecolors, posi, fz, fmt, show_null_values=0):
+            """
+              config cell text and colors
+              and return text elements to add and to dell
+              @TODO: use fmt
+            """
+            text_add = [];
+            text_del = [];
+            cell_val = array_df[lin][col]
+            tot_all = array_df[-1][-1]
+            per = (float(cell_val) / tot_all) * 100
+            curr_column = array_df[:, col]
+            ccl = len(curr_column)
+
+            # last line  and/or last column
+            if (col == (ccl - 1)) or (lin == (ccl - 1)):
+                # tots and percents
+                if (cell_val != 0):
+                    if (col == ccl - 1) and (lin == ccl - 1):
+                        tot_rig = 0
+                        for i in range(array_df.shape[0] - 1):
+                            tot_rig += array_df[i][i]
+                        per_ok = (float(tot_rig) / cell_val) * 100
+                    elif (col == ccl - 1):
+                        tot_rig = array_df[lin][lin]
+                        per_ok = (float(tot_rig) / cell_val) * 100
+                    elif (lin == ccl - 1):
+                        tot_rig = array_df[col][col]
+                        per_ok = (float(tot_rig) / cell_val) * 100
+                    per_err = 100 - per_ok
+                else:
+                    per_ok = per_err = 0
+
+                per_ok_s = ['%.2f%%' % (per_ok), '100%'][int(per_ok) == 100]
+
+                # text to DEL
+                text_del.append(oText)
+
+                # text to ADD
+                font_prop = fm.FontProperties(weight='bold', size=fz)
+                text_kwargs = dict(color='w', ha="center", va="center", gid='sum', fontproperties=font_prop)
+                lis_txt = ['%d' % (cell_val), per_ok_s, '%.2f%%' % (per_err)]
+                lis_kwa = [text_kwargs]
+                dic = text_kwargs.copy();
+                dic['color'] = 'g';
+                lis_kwa.append(dic);
+                dic = text_kwargs.copy();
+                dic['color'] = 'r';
+                lis_kwa.append(dic);
+                lis_pos = [(oText._x, oText._y - 0.3), (oText._x, oText._y), (oText._x, oText._y + 0.3)]
+                for i in range(len(lis_txt)):
+                    newText = dict(x=lis_pos[i][0], y=lis_pos[i][1], text=lis_txt[i], kw=lis_kwa[i])
+                    # print 'lin: %s, col: %s, newText: %s' %(lin, col, newText)
+                    text_add.append(newText)
+                # print '\n'
+
+                # set background color for sum cells (last line and last column)
+                carr = [0.27, 0.30, 0.27, 1.0]
+                if (col == ccl - 1) and (lin == ccl - 1):
+                    carr = [0.17, 0.20, 0.17, 1.0]
+                facecolors[posi] = carr
+
+            else:
+                if (per > 0):
+                    txt = '%s\n%.2f%%' % (cell_val, per)
+                else:
+                    if (show_null_values == 0):
+                        txt = ''
+                    elif (show_null_values == 1):
+                        txt = '0'
+                    else:
+                        txt = '0\n0.0%'
+                oText.set_text(txt)
+
+                # main diagonal
+                if (col == lin):
+                    # set color of the textin the diagonal to white
+                    oText.set_color('w')
+                    # set background color in the diagonal to blue
+                    facecolors[posi] = [0.35, 0.8, 0.55, 1.0]
+                else:
+                    oText.set_color('r')
+
+            return text_add, text_del
+
+
+        x_label = 'Predicted'
+        y_label = 'Actual'
+        confusion_matrix_df = instanciar_data_frame(matriz,labels_categorias)
+        insert_totals(confusion_matrix_df)
+
+        axis = self.axes[i_axis]
+
+        ax = sn.heatmap(confusion_matrix_df, annot=True, annot_kws={"size": tam_fuente}, linewidths=ancho_linea, ax=axis,
+                        cbar=False, cmap=cmap, linecolor='w', fmt=fmt)
+
+        #Rotamos los ticks
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, fontsize=10)
+        ax.set_yticklabels(ax.get_yticklabels(), rotation=25, fontsize=10)
+
+        # Turn off all the ticks
+        for t in ax.xaxis.get_major_ticks():
+            t.tick1line.set_visible(False)
+            t.tick2line.set_visible(False)
+        for t in ax.yaxis.get_major_ticks():
+            t.tick1line.set_visible(False)
+            t.tick2line.set_visible(False)
+
+        # face colors list
+        quadmesh = ax.findobj(QuadMesh)[0]
+        facecolors = quadmesh.get_facecolors()
+
+        # iter in text elements
+        array_df = np.array(confusion_matrix_df.to_records(index=False).tolist())
+        text_add = [];
+        text_del = [];
+        posi = -1  # from left to right, bottom to top.
+        for t in ax.collections[0].axes.texts:  # ax.texts:
+            pos = np.array(t.get_position()) - [0.5, 0.5]
+            lin = int(pos[1]);
+            col = int(pos[0]);
+            posi += 1
+            # print ('>>> pos: %s, posi: %s, val: %s, txt: %s' %(pos, posi, array_df[lin][col], t.get_text()))
+
+            # set text
+            txt_res = configcell_text_and_colors(array_df, lin, col, t, facecolors, posi, tam_fuente, fmt)
+
+            text_add.extend(txt_res[0])
+            text_del.extend(txt_res[1])
+
+        # remove the old ones
+        for item in text_del:
+            item.remove()
+        # append the new ones
+        for item in text_add:
+            ax.text(item['x'], item['y'], item['text'], **item['kw'])
+
+        # titles and legends
+        ax.set_title('Confusion matrix')
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
 
     def display_graficos(self):
         """

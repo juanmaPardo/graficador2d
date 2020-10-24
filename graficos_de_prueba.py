@@ -185,6 +185,19 @@ def prueba_matriz_confusion_con_categorias():
     gf.display_graficos()
 
 
+def prueba_grafico_por_imagen():
+    gf = Graficador(["0:,0:"], filas=2, col=2, estilo="seaborn")
+    gf.graficar_imagen_por_ruta(0,"/home/juan/Downloads/feedfw.png")
+    #/ home / juan / Downloads
+    gf.display_graficos()
+
+def prueba_grafico_por_imagen2():
+    gf = Graficador(["0:2,0:","2:,0:"], filas=4, col=4, estilo="seaborn")
+    gf.graficar_imagen_por_ruta(0,"/home/juan/Downloads/feedfw.png")
+    gf.graficar_imagen_por_ruta(1, "/home/juan/Downloads/cnn.jpeg")
+    #/ home / juan / Downloads
+    gf.display_graficos()
+
 #2980b9
 #set_de_graficos_uno()
 #set_de_graficos_numero_dos()
@@ -203,8 +216,11 @@ def prueba_matriz_confusion_con_categorias():
 
 #prueba_contornos()
 
-prueba_matriz_confusion_con_categorias()
-prueba_matriz_confusion_sin_categorias()
+#prueba_matriz_confusion_con_categorias()
+#prueba_matriz_confusion_sin_categorias()
+
+prueba_grafico_por_imagen()
+prueba_grafico_por_imagen2()
 
 
 

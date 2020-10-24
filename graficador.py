@@ -1,6 +1,7 @@
 #Librerias helpers
 import numpy as np
 from pandas import DataFrame
+from PIL import Image
 
 #Clases necesarias
 from matplotlib.animation import FuncAnimation
@@ -901,6 +902,27 @@ class Graficador:
         ax.set_title('Confusion matrix')
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
+
+    def graficar_imagen_por_matriz(self,i_axis,matriz):
+        """
+        Grafica una imagen dado una matriz
+        :param i_axis: Indice de la axis sobre la cual graficar la imagen
+        :param matriz: Matriz que representa la imagen
+        """
+        ax = self.axes[i_axis]
+        ax.imshow(matriz)
+        ax.set_axis_off()
+
+    def graficar_imagen_por_ruta(self,i_axis,ruta):
+        """
+        Grafica una imagen dado una ruta
+        :param i_axis: Indice de la axis sobre la cual graficar la imagen
+        :param ruta: Ruta en donde se encuentra la imagen
+        """
+        ax = self.axes[i_axis]
+        image = Image.open(ruta)
+        ax.imshow(image)
+        ax.set_axis_off()
 
     def display_graficos(self):
         """
